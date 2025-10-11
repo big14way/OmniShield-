@@ -19,7 +19,7 @@ interface IInsurancePool {
     );
 
     event PolicyClaimed(uint256 indexed policyId, uint256 claimAmount);
-    
+
     event PremiumPaid(uint256 indexed policyId, uint256 amount);
 
     function createPolicy(

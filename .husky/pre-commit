@@ -1,0 +1,22 @@
+# Run lint-staged for formatting and linting
+npx lint-staged
+
+# Check for console.log in Solidity files
+if git diff --cached --name-only | grep -E '\.sol$' | xargs grep -n "console.log" 2>/dev/null; then
+  echo "Error: console.log found in Solidity files. Please remove before committing."
+  exit 1
+fi
+
+# Check for console.log in TypeScript files
+if git diff --cached --name-only | grep -E '\.ts$' | xargs grep -n "console.log" 2>/dev/null; then
+  echo "Warning: console.log found in TypeScript files. Consider removing before committing."
+  # Uncomment the line below to make this check blocking
+  # exit 1
+fi
+
+# Run tests for changed contracts (optional - comment out if too slow)
+# CHANGED_CONTRACTS=$(git diff --cached --name-only | grep -E '\.sol$')
+# if [ ! -z "$CHANGED_CONTRACTS" ]; then
+#   echo "Running tests for changed contracts..."
+#   npm run test
+# fi

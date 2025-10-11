@@ -10,7 +10,7 @@ describe("RiskEngine", function () {
 
   beforeEach(async function () {
     [owner, user] = await ethers.getSigners();
-    
+
     const RiskEngine = await ethers.getContractFactory("RiskEngine");
     riskEngine = await RiskEngine.deploy();
     await riskEngine.waitForDeployment();
@@ -36,10 +36,7 @@ describe("RiskEngine", function () {
 
     it("Should determine eligibility for coverage", async function () {
       const coverageAmount = ethers.parseEther("10");
-      const isEligible = await riskEngine.isEligibleForCoverage(
-        user.address,
-        coverageAmount
-      );
+      const isEligible = await riskEngine.isEligibleForCoverage(user.address, coverageAmount);
       expect(isEligible).to.be.true;
     });
   });
@@ -47,7 +44,7 @@ describe("RiskEngine", function () {
   describe("Risk Profile Management", function () {
     it("Should update risk profile", async function () {
       await riskEngine.updateRiskProfile(user.address);
-      
+
       const profile = await riskEngine.getRiskProfile(user.address);
       expect(profile.isActive).to.be.true;
       expect(profile.riskScore).to.be.greaterThan(0);
@@ -56,23 +53,21 @@ describe("RiskEngine", function () {
     it("Should allow owner to set risk score", async function () {
       const newScore = 5000;
       await riskEngine.setRiskScore(user.address, newScore);
-      
+
       const profile = await riskEngine.getRiskProfile(user.address);
       expect(profile.riskScore).to.equal(newScore);
     });
 
     it("Should reject invalid risk scores", async function () {
       const invalidScore = 15000;
-      await expect(
-        riskEngine.setRiskScore(user.address, invalidScore)
-      ).to.be.revertedWith("Invalid risk score");
+      await expect(riskEngine.setRiskScore(user.address, invalidScore)).to.be.revertedWith(
+        "Invalid risk score"
+      );
     });
 
     it("Should not allow non-owner to set risk score", async function () {
       const newScore = 5000;
-      await expect(
-        riskEngine.connect(user).setRiskScore(user.address, newScore)
-      ).to.be.reverted;
+      await expect(riskEngine.connect(user).setRiskScore(user.address, newScore)).to.be.reverted;
     });
   });
 });

@@ -5,7 +5,11 @@ async function main() {
 
   const [deployer] = await ethers.getSigners();
   console.log("Deploying contracts with account:", deployer.address);
-  console.log("Account balance:", ethers.formatEther(await ethers.provider.getBalance(deployer.address)), "ETH\n");
+  console.log(
+    "Account balance:",
+    ethers.formatEther(await ethers.provider.getBalance(deployer.address)),
+    "ETH\n"
+  );
 
   console.log("Deploying RiskEngine...");
   const RiskEngine = await ethers.getContractFactory("RiskEngine");
@@ -44,8 +48,12 @@ async function main() {
 
   console.log("\n=== Verification Commands ===");
   console.log(`npx hardhat verify --network <network-name> ${riskEngineAddress}`);
-  console.log(`npx hardhat verify --network <network-name> ${insurancePoolAddress} ${riskEngineAddress}`);
-  console.log(`npx hardhat verify --network <network-name> ${claimsProcessorAddress} ${insurancePoolAddress}`);
+  console.log(
+    `npx hardhat verify --network <network-name> ${insurancePoolAddress} ${riskEngineAddress}`
+  );
+  console.log(
+    `npx hardhat verify --network <network-name> ${claimsProcessorAddress} ${insurancePoolAddress}`
+  );
   console.log(`npx hardhat verify --network <network-name> ${hederaBridgeAddress}`);
 }
 

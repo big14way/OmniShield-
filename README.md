@@ -7,7 +7,7 @@ A comprehensive DeFi insurance protocol with cross-chain support, built on Ether
 - **Insurance Pool Management**: Create and manage insurance policies with customizable coverage
 - **Risk Engine**: Advanced risk assessment and premium calculation
 - **Claims Processing**: Automated claims submission and approval workflow
-- **Cross-Chain Support**: 
+- **Cross-Chain Support**:
   - CCIP integration for cross-chain messaging
   - Hedera bridge for asset transfers
 - **Oracle Integration**: Pyth Network price feeds for real-time data
@@ -144,14 +144,17 @@ npm run verify:hedera
 ## Networks
 
 ### Ethereum Sepolia
+
 - Chain ID: 11155111
 - RPC: Via Alchemy
 
 ### Polygon Amoy
+
 - Chain ID: 80002
 - RPC: https://rpc-amoy.polygon.technology
 
 ### Hedera Testnet
+
 - Chain ID: 296
 - RPC: https://testnet.hashio.io/api
 

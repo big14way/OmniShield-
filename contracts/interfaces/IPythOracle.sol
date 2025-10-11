@@ -9,14 +9,9 @@ interface IPythOracle {
         uint256 publishTime;
     }
 
-    function getPriceNoOlderThan(
-        bytes32 id,
-        uint256 age
-    ) external view returns (Price memory);
+    function getPriceNoOlderThan(bytes32 id, uint256 age) external view returns (Price memory);
 
-    function updatePriceFeeds(
-        bytes[] calldata priceUpdateData
-    ) external payable;
+    function updatePriceFeeds(bytes[] calldata priceUpdateData) external payable;
 
     function getUpdateFee(
         bytes[] calldata priceUpdateData

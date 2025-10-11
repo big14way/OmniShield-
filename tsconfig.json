@@ -14,19 +14,7 @@
     "declarationMap": true,
     "sourceMap": true
   },
-  "include": [
-    "./scripts",
-    "./test",
-    "./tasks",
-    "./hardhat.config.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "artifacts",
-    "cache",
-    "coverage"
-  ],
-  "files": [
-    "./hardhat.config.ts"
-  ]
+  "include": ["./scripts", "./test", "./tasks", "./hardhat.config.ts"],
+  "exclude": ["node_modules", "artifacts", "cache", "coverage"],
+  "files": ["./hardhat.config.ts"]
 }

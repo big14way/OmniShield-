@@ -1,0 +1,15 @@
+{
+  "detectors_to_exclude": "naming-convention,external-function,low-level-calls",
+  "filter_paths": "node_modules|test|mock",
+  "solc_remaps": [
+    "@openzeppelin/contracts=node_modules/@openzeppelin/contracts",
+    "@chainlink/contracts=node_modules/@chainlink/contracts",
+    "@pythnetwork/pyth-sdk-solidity=node_modules/@pythnetwork/pyth-sdk-solidity"
+  ],
+  "compile_force_framework": "hardhat",
+  "exclude_informational": true,
+  "exclude_low": true,
+  "exclude_optimization": true,
+  "fail_on_medium": true,
+  "fail_on_high": true
+}

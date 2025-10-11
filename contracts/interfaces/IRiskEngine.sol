@@ -17,9 +17,7 @@ interface IRiskEngine {
 
     function updateRiskProfile(address user) external;
 
-    function getRiskProfile(
-        address user
-    ) external view returns (RiskProfile memory);
+    function getRiskProfile(address user) external view returns (RiskProfile memory);
 
     function isEligibleForCoverage(
         address user,

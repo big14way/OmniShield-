@@ -8,9 +8,10 @@ import * as dotenv from "dotenv";
 
 dotenv.config();
 
-const PRIVATE_KEY = process.env.PRIVATE_KEY && process.env.PRIVATE_KEY.length === 66 
-  ? process.env.PRIVATE_KEY 
-  : "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
+const PRIVATE_KEY =
+  process.env.PRIVATE_KEY && process.env.PRIVATE_KEY.length === 66
+    ? process.env.PRIVATE_KEY
+    : "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY || "";
 const HEDERA_TESTNET_RPC = process.env.HEDERA_TESTNET_RPC || "https://testnet.hashio.io/api";
 const POLYGONSCAN_API_KEY = process.env.POLYGONSCAN_API_KEY || "";
@@ -26,27 +27,27 @@ const config: HardhatUserConfig = {
       viaIR: false,
     },
   },
-  
+
   networks: {
     hardhat: {
       chainId: 31337,
       allowUnlimitedContractSize: false,
     },
-    
+
     "ethereum-sepolia": {
       url: `https://eth-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY || ""}`,
       accounts: [PRIVATE_KEY],
       chainId: 11155111,
       gasPrice: "auto",
     },
-    
+
     "hedera-testnet": {
       url: HEDERA_TESTNET_RPC,
       accounts: [PRIVATE_KEY],
       chainId: 296,
       gasPrice: "auto",
     },
-    
+
     "polygon-amoy": {
       url: "https://rpc-amoy.polygon.technology",
       accounts: [PRIVATE_KEY],
@@ -54,7 +55,7 @@ const config: HardhatUserConfig = {
       gasPrice: "auto",
     },
   },
-  
+
   etherscan: {
     apiKey: {
       sepolia: ETHERSCAN_API_KEY,
@@ -80,7 +81,7 @@ const config: HardhatUserConfig = {
       },
     ],
   },
-  
+
   gasReporter: {
     enabled: process.env.REPORT_GAS === "true",
     currency: "USD",
@@ -88,21 +89,21 @@ const config: HardhatUserConfig = {
     noColors: true,
     coinmarketcap: process.env.COINMARKETCAP_API_KEY || "",
   },
-  
+
   contractSizer: {
     alphaSort: true,
     disambiguatePaths: false,
     runOnCompile: true,
     strict: true,
   },
-  
+
   paths: {
     sources: "./contracts",
     tests: "./test",
     cache: "./cache",
     artifacts: "./artifacts",
   },
-  
+
   mocha: {
     timeout: 40000,
   },

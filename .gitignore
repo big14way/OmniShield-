@@ -16,6 +16,10 @@ coverage.json
 # Gas reports
 gas-report.txt
 
+# Slither reports
+slither-report.json
+crytic-export/
+
 # Hardhat Ignition default folder for deployments against a local node
 ignition/deployments/chain-31337
 
