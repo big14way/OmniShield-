@@ -1,0 +1,59 @@
+{
+  "name": "omnishield-protocol",
+  "version": "1.0.0",
+  "description": "OmniShield - A DeFi Insurance Protocol with Cross-Chain Support",
+  "main": "index.js",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "test:unit": "hardhat test test/unit/**/*.ts",
+    "test:integration": "hardhat test test/integration/**/*.ts",
+    "test:e2e": "hardhat test test/e2e/**/*.ts",
+    "coverage": "hardhat coverage",
+    "deploy:local": "hardhat run scripts/deploy/deploy.ts --network hardhat",
+    "deploy:sepolia": "hardhat run scripts/deploy/deploy.ts --network ethereum-sepolia",
+    "deploy:hedera": "hardhat run scripts/deploy/deploy.ts --network hedera-testnet",
+    "deploy:polygon": "hardhat run scripts/deploy/deploy.ts --network polygon-amoy",
+    "verify:sepolia": "hardhat verify --network ethereum-sepolia",
+    "verify:hedera": "hardhat verify --network hedera-testnet",
+    "verify:polygon": "hardhat verify --network polygon-amoy",
+    "size": "hardhat size-contracts",
+    "gas-report": "REPORT_GAS=true hardhat test",
+    "clean": "hardhat clean",
+    "node": "hardhat node",
+    "typechain": "hardhat typechain"
+  },
+  "keywords": [
+    "defi",
+    "insurance",
+    "blockchain",
+    "smart-contracts",
+    "ethereum",
+    "polygon",
+    "hedera",
+    "pyth",
+    "chainlink"
+  ],
+  "author": "OmniShield Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^6.1.0",
+    "@nomicfoundation/hardhat-verify": "^2.1.1",
+    "@typechain/ethers-v6": "^0.5.1",
+    "@typechain/hardhat": "^9.1.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^24.7.1",
+    "hardhat": "^2.26.3",
+    "hardhat-contract-sizer": "^2.10.1",
+    "hardhat-gas-reporter": "^2.3.0",
+    "solidity-coverage": "^0.8.16",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@chainlink/contracts": "^1.5.0",
+    "@chainlink/contracts-ccip": "^1.6.2",
+    "@openzeppelin/contracts": "^5.4.0",
+    "@pythnetwork/pyth-sdk-solidity": "^4.2.0",
+    "dotenv": "^17.2.3"
+  }
+}

@@ -1,0 +1,44 @@
+# Hardhat files
+cache/
+artifacts/
+typechain-types/
+
+# Node modules
+node_modules/
+
+# Environment variables
+.env
+
+# Coverage
+coverage/
+coverage.json
+
+# Gas reports
+gas-report.txt
+
+# Hardhat Ignition default folder for deployments against a local node
+ignition/deployments/chain-31337
+
+# Build info
+artifacts/build-info/
+
+# TypeScript
+*.tsbuildinfo
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Temp files
+tmp/
+temp/
