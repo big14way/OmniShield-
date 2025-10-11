@@ -31,6 +31,7 @@ Uses **Solhint** with security-focused rules.
 - **Config**: `.solhint.json`
 
 Common warnings:
+
 - Missing NatSpec documentation (use `@title`, `@notice`, `@param`, `@return`)
 - Gas optimization suggestions
 - Security best practices
@@ -53,6 +54,7 @@ Uses **ESLint v9** with TypeScript support.
 4. **Console.log detection** - Blocks commits with `console.log` in Solidity files
 
 To bypass hooks (use sparingly):
+
 ```bash
 git commit --no-verify -m "your message"
 ```
@@ -89,11 +91,13 @@ solc-select use 0.8.24
 ```
 
 Run Slither:
+
 ```bash
 slither . --config-file slither.config.json
 ```
 
 Configuration: `slither.config.json`
+
 - Focuses on high and medium severity issues
 - Excludes optimization and informational findings
 - Filters test and mock contracts
@@ -101,12 +105,14 @@ Configuration: `slither.config.json`
 ## CI/CD Pipeline
 
 GitHub Actions workflow (`.github/workflows/test.yml`) runs on:
+
 - Push to `main` branch
 - All pull requests
 
 ### Workflow Jobs
 
 #### 1. Lint and Test
+
 - Prettier formatting check
 - ESLint for TypeScript
 - Solhint for Solidity
@@ -117,33 +123,35 @@ GitHub Actions workflow (`.github/workflows/test.yml`) runs on:
 - Coverage upload to Codecov
 
 #### 2. Security Analysis
+
 - Slither static analysis
 - Report uploaded as artifact
 
 #### 3. Build Check
+
 - Clean build verification
 - TypeScript compilation check
 
 ## Available Scripts
 
-| Script | Description |
-|--------|-------------|
-| `npm run compile` | Compile Solidity contracts |
-| `npm test` | Run all tests |
-| `npm run coverage` | Generate coverage report |
-| `npm run size` | Check contract sizes |
-| `npm run gas-report` | Generate gas usage report |
-| `npm run lint` | Run all linters |
-| `npm run lint:sol` | Lint Solidity files |
-| `npm run lint:ts` | Lint TypeScript files |
-| `npm run lint:fix` | Auto-fix linting issues |
-| `npm run format` | Format all files |
-| `npm run format:check` | Check formatting |
-| `npm run clean` | Clean build artifacts |
-| `npm run deploy:local` | Deploy to local network |
-| `npm run deploy:sepolia` | Deploy to Sepolia |
-| `npm run deploy:hedera` | Deploy to Hedera testnet |
-| `npm run deploy:polygon` | Deploy to Polygon Amoy |
+| Script                   | Description                |
+| ------------------------ | -------------------------- |
+| `npm run compile`        | Compile Solidity contracts |
+| `npm test`               | Run all tests              |
+| `npm run coverage`       | Generate coverage report   |
+| `npm run size`           | Check contract sizes       |
+| `npm run gas-report`     | Generate gas usage report  |
+| `npm run lint`           | Run all linters            |
+| `npm run lint:sol`       | Lint Solidity files        |
+| `npm run lint:ts`        | Lint TypeScript files      |
+| `npm run lint:fix`       | Auto-fix linting issues    |
+| `npm run format`         | Format all files           |
+| `npm run format:check`   | Check formatting           |
+| `npm run clean`          | Clean build artifacts      |
+| `npm run deploy:local`   | Deploy to local network    |
+| `npm run deploy:sepolia` | Deploy to Sepolia          |
+| `npm run deploy:hedera`  | Deploy to Hedera testnet   |
+| `npm run deploy:polygon` | Deploy to Polygon Amoy     |
 
 ## Best Practices
 
@@ -176,6 +184,7 @@ GitHub Actions workflow (`.github/workflows/test.yml`) runs on:
 ### Pre-commit Hook Fails
 
 If pre-commit hooks fail:
+
 1. Review the error messages
 2. Fix the issues manually
 3. Re-stage files: `git add .`
@@ -189,6 +198,7 @@ Old `.eslintrc.*` files are deprecated.
 ### Coverage Report Not Generated
 
 Make sure you have all dependencies installed:
+
 ```bash
 npm ci
 ```
@@ -196,6 +206,7 @@ npm ci
 ### Slither Not Found
 
 Install Slither and configure solc version:
+
 ```bash
 pip3 install slither-analyzer solc-select
 solc-select install 0.8.24

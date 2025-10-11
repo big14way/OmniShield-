@@ -11,8 +11,8 @@ describe("RiskEngine", function () {
   beforeEach(async function () {
     [owner, user] = await ethers.getSigners();
 
-    const RiskEngine = await ethers.getContractFactory("RiskEngine");
-    riskEngine = await RiskEngine.deploy();
+    const RiskEngineFactory = await ethers.getContractFactory("RiskEngine");
+    riskEngine = (await RiskEngineFactory.deploy()) as unknown as RiskEngine;
     await riskEngine.waitForDeployment();
   });
 

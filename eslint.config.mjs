@@ -47,6 +47,42 @@ export default [
       "prefer-const": "error",
     },
   },
+  // Test files configuration
+  {
+    files: ["test/**/*.ts", "**/*.test.ts", "**/*.spec.ts"],
+    languageOptions: {
+      parser: tsparser,
+      globals: {
+        describe: "readonly",
+        it: "readonly",
+        before: "readonly",
+        after: "readonly",
+        beforeEach: "readonly",
+        afterEach: "readonly",
+        expect: "readonly",
+        assert: "readonly",
+        console: "readonly",
+        process: "readonly",
+        Buffer: "readonly",
+      },
+    },
+    plugins: {
+      "@typescript-eslint": tseslint,
+    },
+    rules: {
+      ...tseslint.configs.recommended.rules,
+      "@typescript-eslint/no-unused-expressions": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "no-console": "off",
+    },
+  },
+  // Scripts configuration - allow console.log in scripts
+  {
+    files: ["scripts/**/*.ts"],
+    rules: {
+      "no-console": "off",
+    },
+  },
   {
     ignores: [
       "node_modules/**",
