@@ -58,6 +58,7 @@
   "author": "OmniShield Team",
   "license": "MIT",
   "devDependencies": {
+    "@chainlink/contracts": "^1.5.0",
     "@eslint/js": "^9.37.0",
     "@nomicfoundation/hardhat-toolbox": "^6.1.0",
     "@nomicfoundation/hardhat-verify": "^2.1.1",
@@ -81,7 +82,6 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@chainlink/contracts": "^1.5.0",
     "@chainlink/contracts-ccip": "^1.6.2",
     "@openzeppelin/contracts": "^5.4.0",
     "@pythnetwork/pyth-sdk-solidity": "^4.2.0",
