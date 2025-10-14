@@ -169,11 +169,16 @@ async function deployHederaInsurancePool(
   const artifact = JSON.parse(fs.readFileSync(artifactPath, "utf8"));
   const bytecode = artifact.bytecode;
 
-  // Convert addresses to bytes32 for Hedera
-  const riskEngineBytes = Buffer.from(riskEngineAddress.replace("0x", ""), "hex");
-  const treasuryBytes = Buffer.from(treasuryAccount.replace("0x", ""), "hex");
-  const htsTokenBytes = Buffer.from(htsTokenId.toSolidityAddress(), "hex");
+  // Convert addresses to proper format for Hedera SDK
+  const riskEngineAddress0x = riskEngineAddress.startsWith("0x")
+    ? riskEngineAddress
+    : `0x${riskEngineAddress}`;
+  const treasuryAddress0x = treasuryAccount.startsWith("0x")
+    ? treasuryAccount
+    : `0x${treasuryAccount}`;
+  const htsTokenAddress0x = `0x${htsTokenId.toSolidityAddress()}`;
   const consensusTopicBytes = Buffer.from(consensusTopicId.toString());
+  const consensusTopicUint8 = new Uint8Array(consensusTopicBytes);
 
   // Create contract
   const contractCreateFlow = new ContractCreateFlow()
@@ -181,12 +186,11 @@ async function deployHederaInsurancePool(
     .setGas(3000000)
     .setConstructorParameters(
       new ContractFunctionParameters()
-        .addAddress(riskEngineBytes)
-        .addAddress(treasuryBytes)
-        .addAddress(htsTokenBytes)
-        .addBytes32(Array.from(consensusTopicBytes))
-    )
-    .setMaxTransactionFee(new Hbar(100));
+        .addAddress(riskEngineAddress0x)
+        .addAddress(treasuryAddress0x)
+        .addAddress(htsTokenAddress0x)
+        .addBytes32(consensusTopicUint8)
+    );
 
   const contractCreateSubmit = await contractCreateFlow.execute(client);
   const contractCreateReceipt = await contractCreateSubmit.getReceipt(client);
@@ -215,14 +219,16 @@ async function configureContractRoles(
   // Grant CLAIM_VOTER_ROLE to operator
   const claimVoterRoleHash = ethers.keccak256(ethers.toUtf8Bytes("CLAIM_VOTER_ROLE"));
 
+  const roleHashBytes = Buffer.from(claimVoterRoleHash.replace("0x", ""), "hex");
+
   const grantRoleTx = new ContractExecuteTransaction()
     .setContractId(contractId)
     .setGas(100000)
     .setFunction(
       "grantRole",
       new ContractFunctionParameters()
-        .addBytes32(Buffer.from(claimVoterRoleHash.replace("0x", ""), "hex"))
-        .addAddress(Buffer.from(operatorAccount.toSolidityAddress(), "hex"))
+        .addBytes32(new Uint8Array(roleHashBytes))
+        .addAddress(`0x${operatorAccount.toSolidityAddress()}`)
     )
     .setMaxTransactionFee(new Hbar(5));
 

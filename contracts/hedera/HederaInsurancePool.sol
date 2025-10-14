@@ -407,11 +407,16 @@ contract HederaInsurancePool is IInsurancePool, AccessControl, ReentrancyGuard, 
             // Transfer claim amount
             if (policy.htsToken == address(0)) {
                 // Pay in HBAR
+                require(address(this).balance >= claim.claimAmount, "Insufficient pool balance");
                 payable(claim.claimant).transfer(claim.claimAmount);
             }
             // HTS token transfer would be handled here
 
-            totalPoolBalance -= claim.claimAmount;
+            if (totalPoolBalance >= claim.claimAmount) {
+                totalPoolBalance -= claim.claimAmount;
+            } else {
+                totalPoolBalance = 0;
+            }
         }
 
         emit ClaimResolved(claimId, claim.policyId, approved, claim.claimAmount);

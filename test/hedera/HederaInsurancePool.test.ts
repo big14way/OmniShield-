@@ -33,17 +33,17 @@ describe("HederaInsurancePool", function () {
 
     // Deploy RiskEngine
     const RiskEngineFactory = await ethers.getContractFactory("RiskEngine");
-    riskEngine = await RiskEngineFactory.deploy();
+    riskEngine = (await RiskEngineFactory.deploy()) as unknown as RiskEngine;
     await riskEngine.waitForDeployment();
 
     // Deploy HederaInsurancePool
     const HederaPoolFactory = await ethers.getContractFactory("HederaInsurancePool");
-    hederaPool = await HederaPoolFactory.deploy(
+    hederaPool = (await HederaPoolFactory.deploy(
       await riskEngine.getAddress(),
       treasury.address,
       HTS_TOKEN_ADDRESS,
       CONSENSUS_TOPIC_ID
-    );
+    )) as unknown as HederaInsurancePool;
     await hederaPool.waitForDeployment();
   });
 
@@ -242,6 +242,12 @@ describe("HederaInsurancePool", function () {
       const claimAmount = COVERAGE_AMOUNT / 2n;
       await hederaPool.connect(user1).submitClaim(policyId, claimAmount);
 
+      // Fund the pool to cover the claim
+      await owner.sendTransaction({
+        to: await hederaPool.getAddress(),
+        value: claimAmount,
+      });
+
       const CLAIM_VOTER_ROLE = ethers.keccak256(ethers.toUtf8Bytes("CLAIM_VOTER_ROLE"));
       await hederaPool.grantRole(CLAIM_VOTER_ROLE, owner.address);
       await hederaPool.grantRole(CLAIM_VOTER_ROLE, user2.address);
@@ -308,7 +314,9 @@ describe("HederaInsurancePool", function () {
     it("Should apply 30% Hedera fee reduction", async function () {
       // Deploy standard pool for comparison
       const InsurancePoolFactory = await ethers.getContractFactory("InsurancePool");
-      const standardPool = await InsurancePoolFactory.deploy(await riskEngine.getAddress());
+      const standardPool = (await InsurancePoolFactory.deploy(
+        await riskEngine.getAddress()
+      )) as any;
 
       const standardPremium = await standardPool
         .connect(user1)
