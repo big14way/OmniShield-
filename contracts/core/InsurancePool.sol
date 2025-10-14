@@ -59,7 +59,10 @@ contract InsurancePool is IInsurancePool, Ownable, ReentrancyGuard, Pausable {
         return policyId;
     }
 
-    function submitClaim(uint256 policyId, uint256 claimAmount) external override nonReentrant {
+    function submitClaim(
+        uint256 policyId,
+        uint256 claimAmount
+    ) external override nonReentrant whenNotPaused {
         Policy storage policy = _policies[policyId];
         require(policy.holder == msg.sender, "Not policy holder");
         require(policy.active, "Policy not active");
