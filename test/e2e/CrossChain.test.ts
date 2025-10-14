@@ -7,7 +7,6 @@ import {
   MockERC20,
 } from "../../typechain-types";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { increaseTime } from "../helpers/time";
 import { COVERAGE_AMOUNTS, COVERAGE_DURATIONS } from "../helpers/coverage";
 
 /**
@@ -35,7 +34,6 @@ describe("E2E: Cross-Chain Coverage Flow", function () {
 
   let owner: HardhatEthersSigner;
   let user1: HardhatEthersSigner;
-  let user2: HardhatEthersSigner;
   let mockRouter: HardhatEthersSigner;
 
   // Chain selectors (mock values)
@@ -51,7 +49,7 @@ describe("E2E: Cross-Chain Coverage Flow", function () {
     console.log("\n  🌐 Starting Cross-Chain E2E Test...\n");
     startTime = Date.now();
 
-    [owner, user1, user2, mockRouter] = await ethers.getSigners();
+    [owner, user1, , mockRouter] = await ethers.getSigners();
   });
 
   describe("Step 1: Setup Test Environment", function () {

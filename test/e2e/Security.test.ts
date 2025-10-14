@@ -21,14 +21,13 @@ describe("E2E: Security Scenarios", function () {
   let owner: HardhatEthersSigner;
   let attacker: HardhatEthersSigner;
   let user1: HardhatEthersSigner;
-  let user2: HardhatEthersSigner;
   let newAdmin: HardhatEthersSigner;
 
   const COVERAGE_AMOUNT = COVERAGE_AMOUNTS.MEDIUM;
   const DURATION = COVERAGE_DURATIONS.ONE_MONTH;
 
   beforeEach(async function () {
-    [owner, attacker, user1, user2, newAdmin] = await ethers.getSigners();
+    [owner, attacker, user1, , newAdmin] = await ethers.getSigners();
 
     // Deploy contracts
     const RiskEngineFactory = await ethers.getContractFactory("RiskEngine");
