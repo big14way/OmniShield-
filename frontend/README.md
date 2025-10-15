@@ -77,6 +77,7 @@ frontend/
 ## Core Components
 
 ### Purchase Coverage
+
 - Asset selector (ETH, BTC, HBAR)
 - Coverage amount input with USD conversion
 - Duration slider (7-365 days)
@@ -85,12 +86,14 @@ frontend/
 - Wallet connection and transaction handling
 
 ### Liquidity Pool
+
 - Pool statistics dashboard (TVL, APY, Utilization)
 - LP position tracker
 - Add/withdraw liquidity interface
 - Earnings calculator
 
 ### Claims Center
+
 - Active coverage cards
 - Claim submission form
 - Claims history table
@@ -99,11 +102,13 @@ frontend/
 ## Web3 Integration
 
 ### Supported Networks
+
 - Ethereum Mainnet (Chain ID: 1)
 - Sepolia Testnet (Chain ID: 11155111)
 - Hedera Testnet (Chain ID: 296)
 
 ### Contract Interactions
+
 All contract interactions use custom hooks built on Wagmi v2:
 
 - `usePremiumCalculator()` - Calculate insurance premiums
@@ -115,11 +120,13 @@ All contract interactions use custom hooks built on Wagmi v2:
 ## API Routes
 
 ### GET /api/prices
+
 Fetch real-time asset prices from Pyth Network.
 
 Query params: `symbols=ETH,BTC,HBAR`
 
 Response:
+
 ```json
 {
   "ETH": {
@@ -132,9 +139,11 @@ Response:
 ```
 
 ### POST /api/risk
+
 Calculate risk score and premium.
 
 Body:
+
 ```json
 {
   "coverageAmount": "10",
@@ -145,11 +154,13 @@ Body:
 ```
 
 ### GET /api/coverage
+
 Get user coverage data.
 
 Query params: `address=0x...`
 
 ### GET /api/stats
+
 Get protocol statistics and historical data.
 
 ## Development
@@ -176,10 +187,12 @@ npm run lint
 See `.env.example` for all required and optional environment variables.
 
 Required:
+
 - `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` - WalletConnect project ID
 - Contract addresses for deployed networks
 
 Optional:
+
 - Sentry DSN for error tracking
 - Google Analytics measurement ID
 
@@ -205,11 +218,13 @@ vercel
 ```
 
 ### Environment Variables
+
 Make sure to set all required environment variables in your deployment platform.
 
 ## Monitoring
 
 ### Error Tracking
+
 Configure Sentry for production error tracking:
 
 1. Sign up at https://sentry.io
@@ -217,6 +232,7 @@ Configure Sentry for production error tracking:
 3. Add DSN to `.env.local`
 
 ### Analytics
+
 Add Google Analytics:
 
 1. Create GA4 property

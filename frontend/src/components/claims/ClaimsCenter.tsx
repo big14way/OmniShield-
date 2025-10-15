@@ -94,7 +94,9 @@ export function ClaimsCenter() {
         <div className="bg-gray-50 rounded-xl p-12">
           <div className="text-6xl mb-4">🔒</div>
           <h3 className="text-xl font-semibold mb-2">Connect Your Wallet</h3>
-          <p className="text-gray-600">Please connect your wallet to view your coverage and claims</p>
+          <p className="text-gray-600">
+            Please connect your wallet to view your coverage and claims
+          </p>
         </div>
       </div>
     );

@@ -7,6 +7,7 @@ Complete Next.js 14 frontend implementation with Web3 integration for the OmniSh
 ## ✅ Implementation Status
 
 ### Core Infrastructure
+
 - ✅ Next.js 14 with App Router
 - ✅ TypeScript configuration
 - ✅ TailwindCSS v4 setup
@@ -17,6 +18,7 @@ Complete Next.js 14 frontend implementation with Web3 integration for the OmniSh
 ### Components Implemented
 
 #### 1. Coverage Purchase (`/components/coverage/PurchaseCoverage.tsx`)
+
 - ✅ Asset selector with ETH, BTC, HBAR
 - ✅ Coverage amount input with real-time USD conversion
 - ✅ Duration slider (7-365 days)
@@ -26,6 +28,7 @@ Complete Next.js 14 frontend implementation with Web3 integration for the OmniSh
 - ✅ Success notifications
 
 #### 2. Liquidity Pool (`/components/liquidity/LiquidityPool.tsx`)
+
 - ✅ Pool statistics dashboard (TVL, APY, Utilization)
 - ✅ LP position tracker
 - ✅ Add liquidity modal
@@ -34,6 +37,7 @@ Complete Next.js 14 frontend implementation with Web3 integration for the OmniSh
 - ✅ How-it-works guide
 
 #### 3. Claims Center (`/components/claims/ClaimsCenter.tsx`)
+
 - ✅ Active coverage cards display
 - ✅ Claim submission form
 - ✅ Claims history table
@@ -44,18 +48,21 @@ Complete Next.js 14 frontend implementation with Web3 integration for the OmniSh
 ### Web3 Integration (`/lib/web3/`)
 
 #### Configuration (`config.ts`)
+
 - ✅ Wagmi configuration
 - ✅ Multi-chain support (Ethereum, Sepolia, Hedera)
 - ✅ WalletConnect integration
 - ✅ Injected wallet support
 
 #### Contracts (`contracts.ts`)
+
 - ✅ Contract addresses per network
 - ✅ InsurancePool ABI
 - ✅ RiskEngine ABI
 - ✅ Event definitions
 
 #### Custom Hooks (`hooks.ts`)
+
 - ✅ `useInsurancePool()` - Contract instance
 - ✅ `usePremiumCalculator()` - Calculate premiums
 - ✅ `usePolicy()` - Fetch policy details
@@ -67,6 +74,7 @@ Complete Next.js 14 frontend implementation with Web3 integration for the OmniSh
 ### API Routes (`/app/api/`)
 
 #### `/api/prices` (GET)
+
 ```typescript
 // Fetch real-time asset prices from Pyth
 GET /api/prices?symbols=ETH,BTC,HBAR
@@ -77,15 +85,21 @@ Response: {
 ```
 
 #### `/api/risk` (POST)
+
 ```typescript
 // Calculate risk score and premium
-POST /api/risk
-Body: { coverageAmount, duration, asset, coverageType }
+POST / api / risk;
+Body: {
+  (coverageAmount, duration, asset, coverageType);
+}
 
-Response: { riskScore, premium, premiumPercentage, factors }
+Response: {
+  (riskScore, premium, premiumPercentage, factors);
+}
 ```
 
 #### `/api/coverage` (GET)
+
 ```typescript
 // Get user coverage data
 GET /api/coverage?address=0x...
@@ -94,11 +108,14 @@ Response: { active[], expired[], totalCoverage, activePolicies }
 ```
 
 #### `/api/stats` (GET)
+
 ```typescript
 // Protocol statistics
-GET /api/stats
+GET / api / stats;
 
-Response: { tvl, totalCoverage, activePolicies, claims, historicalData }
+Response: {
+  (tvl, totalCoverage, activePolicies, claims, historicalData);
+}
 ```
 
 ### Pages
@@ -112,6 +129,7 @@ Response: { tvl, totalCoverage, activePolicies, claims, historicalData }
 ### Layout Components
 
 #### Header (`/components/layout/Header.tsx`)
+
 - ✅ Logo and navigation
 - ✅ Network switcher (Ethereum, Sepolia, Hedera)
 - ✅ Wallet connection UI
@@ -119,6 +137,7 @@ Response: { tvl, totalCoverage, activePolicies, claims, historicalData }
 - ✅ Disconnect functionality
 
 #### Providers (`/components/layout/Providers.tsx`)
+
 - ✅ Wagmi provider setup
 - ✅ QueryClient configuration
 - ✅ Global state management
@@ -126,6 +145,7 @@ Response: { tvl, totalCoverage, activePolicies, claims, historicalData }
 ### Utilities
 
 #### `lib/utils.ts`
+
 - ✅ `cn()` - Class name merger
 - ✅ `formatAddress()` - Shorten addresses
 - ✅ `formatCurrency()` - Format USD values
@@ -133,6 +153,7 @@ Response: { tvl, totalCoverage, activePolicies, claims, historicalData }
 - ✅ `formatDuration()` - Format time periods
 
 #### `lib/hooks/usePrices.ts`
+
 - ✅ `usePrices()` - Fetch multiple prices
 - ✅ `useAssetPrice()` - Fetch single asset price
 - ✅ 30-second auto-refresh
@@ -148,6 +169,7 @@ npm install
 ```
 
 **Note**: If Web3 dependencies fail to install:
+
 ```bash
 npm install wagmi@^2 viem@^2 @tanstack/react-query@^5 --legacy-peer-deps
 ```
@@ -161,6 +183,7 @@ cp .env.example .env.local
 ```
 
 **Required Variables**:
+
 ```env
 NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_project_id
 
@@ -168,6 +191,7 @@ NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_project_id
 ```
 
 **Contract Addresses** (update after deployment):
+
 ```env
 NEXT_PUBLIC_SEPOLIA_INSURANCE_POOL=0x...
 NEXT_PUBLIC_SEPOLIA_RISK_ENGINE=0x...
@@ -237,27 +261,32 @@ frontend/
 ## Key Features
 
 ### 1. Multi-Chain Support
+
 - Ethereum Mainnet (Chain ID: 1)
 - Sepolia Testnet (Chain ID: 11155111)
 - Hedera Testnet (Chain ID: 296)
 
 ### 2. Real-Time Price Feeds
+
 - Integration with Pyth Network (API route)
 - 30-second auto-refresh
 - Multiple asset support (ETH, BTC, HBAR)
 
 ### 3. Parametric Coverage
+
 - Automated premium calculation
 - Real-time risk scoring
 - Instant policy creation
 - No manual underwriting
 
 ### 4. Cross-Chain Operations
+
 - Network switching in UI
 - Per-network contract addresses
 - Unified user experience
 
 ### 5. Responsive Design
+
 - Mobile-first approach
 - TailwindCSS utilities
 - Modern UI patterns
@@ -343,6 +372,7 @@ CMD ["npm", "start"]
 ### Issue: Wagmi/Viem installation fails
 
 **Solution**:
+
 ```bash
 npm install wagmi viem @tanstack/react-query --legacy-peer-deps
 ```
@@ -350,13 +380,15 @@ npm install wagmi viem @tanstack/react-query --legacy-peer-deps
 ### Issue: "Module not found: wagmi"
 
 **Solution**: Ensure dependencies are installed:
+
 ```bash
 npm install
 ```
 
 ### Issue: Contract interactions fail
 
-**Solution**: 
+**Solution**:
+
 1. Check contract addresses in `.env.local`
 2. Verify network connection
 3. Check wallet network matches app network
@@ -364,6 +396,7 @@ npm install
 ### Issue: Prices not loading
 
 **Solution**:
+
 1. Check `/api/prices` route is accessible
 2. Verify Pyth integration (if using real data)
 3. Check browser console for errors
@@ -378,6 +411,7 @@ npm install
 ## Support
 
 For issues or questions:
+
 1. Check this documentation
 2. Review component code comments
 3. Check browser console for errors

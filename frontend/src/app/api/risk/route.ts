@@ -24,11 +24,7 @@ export async function POST(request: NextRequest) {
     const assetMultiplier =
       asset === "BTC" ? 1.0 : asset === "ETH" ? 1.2 : asset === "HBAR" ? 1.5 : 1.0;
     const typeMultiplier =
-      coverageType === "price_protection"
-        ? 1.5
-        : coverageType === "smart_contract"
-        ? 1.2
-        : 1.3;
+      coverageType === "price_protection" ? 1.5 : coverageType === "smart_contract" ? 1.2 : 1.3;
 
     const riskScore = baseRate * durationMultiplier * assetMultiplier * typeMultiplier;
     const premium = parseFloat(coverageAmount) * riskScore;

@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 // Mock Pyth price data - In production, fetch from Pyth Network
-const MOCK_PRICES: Record<
-  string,
-  { price: number; change24h: number; lastUpdate: number }
-> = {
+const MOCK_PRICES: Record<string, { price: number; change24h: number; lastUpdate: number }> = {
   ETH: { price: 3245.67, change24h: 2.34, lastUpdate: Date.now() },
   BTC: { price: 68234.12, change24h: -1.23, lastUpdate: Date.now() },
   HBAR: { price: 0.12, change24h: 5.67, lastUpdate: Date.now() },

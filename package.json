@@ -24,7 +24,7 @@
     "typechain": "hardhat typechain",
     "lint": "npm run lint:sol && npm run lint:ts",
     "lint:sol": "solhint 'contracts/**/*.sol'",
-    "lint:ts": "eslint --ext .ts .",
+    "lint:ts": "eslint --ext .ts . --ignore-pattern 'frontend/**'",
     "lint:fix": "npm run lint:sol -- --fix && npm run lint:ts -- --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

@@ -1,5 +1,5 @@
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { CONTRACT_ADDRESSES, INSURANCE_POOL_ABI, RISK_ENGINE_ABI } from "./contracts";
 import type { Address } from "viem";
 
@@ -32,7 +32,11 @@ export function usePremiumCalculator(coverageAmount: bigint, duration: bigint) {
 export function usePolicy(policyId: bigint) {
   const { address, abi } = useInsurancePool();
 
-  const { data: policy, isLoading, refetch } = useReadContract({
+  const {
+    data: policy,
+    isLoading,
+    refetch,
+  } = useReadContract({
     address,
     abi,
     functionName: "getPolicy",

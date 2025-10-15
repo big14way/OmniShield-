@@ -23,7 +23,7 @@ export function usePrices(symbols: string[]) {
         setIsLoading(true);
         const response = await fetch(`/api/prices?symbols=${symbols.join(",")}`);
         if (!response.ok) throw new Error("Failed to fetch prices");
-        
+
         const data = await response.json();
         setPrices(data);
         setError(null);
