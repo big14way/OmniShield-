@@ -46,3 +46,5 @@ logs/
 # Temp files
 tmp/
 temp/
+frontend/.next
+frontend/node_modules
