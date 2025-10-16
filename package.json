@@ -32,6 +32,8 @@
     "security:configure-bounty": "SECURITY_ACTION=configure-bounty hardhat run scripts/security/setup-security.ts",
     "security:full-setup": "SECURITY_ACTION=full-setup hardhat run scripts/security/setup-security.ts",
     "audit:prepare": "hardhat run audit/prepare-audit.ts",
+    "validate-mvp": "hardhat run scripts/validate/validate-mvp.ts",
+    "validate-mvp:network": "NETWORK=${NETWORK} hardhat run scripts/validate/validate-mvp.ts",
     "size": "hardhat size-contracts",
     "gas-report": "REPORT_GAS=true hardhat test",
     "clean": "hardhat clean",
