@@ -1,4 +1,4 @@
-import { ethers, network } from "hardhat";
+import { ethers } from "hardhat";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -87,7 +87,8 @@ async function deployCCIPBridge(
 async function configureContracts(addresses: DeploymentAddresses): Promise<void> {
   console.log("  ⚙️  Configuring contracts...");
 
-  const insurancePool = await ethers.getContractAt("InsurancePool", addresses.insurancePool);
+  // Verify contract is accessible
+  await ethers.getContractAt("InsurancePool", addresses.insurancePool);
 
   // Additional configuration can be added here
   // For example, setting initial parameters, whitelisting addresses, etc.
@@ -114,26 +115,8 @@ async function loadDeployment(networkName: string): Promise<DeploymentAddresses 
   return null;
 }
 
-async function verifyContract(
-  networkName: string,
-  address: string,
-  constructorArgs: any[] = []
-): Promise<void> {
-  console.log(`  🔍 Verifying contract at ${address}...`);
-  try {
-    await hre.run("verify:verify", {
-      address,
-      constructorArguments: constructorArgs,
-    });
-    console.log(`  ✅ Contract verified`);
-  } catch (error: any) {
-    if (error.message.includes("Already Verified")) {
-      console.log(`  ℹ️  Contract already verified`);
-    } else {
-      console.error(`  ❌ Verification failed: ${error.message}`);
-    }
-  }
-}
+// Note: For contract verification, use the dedicated verify-all.ts script
+// async function verifyContract(...)
 
 async function deployToNetwork(networkConfig: NetworkConfig): Promise<DeploymentAddresses> {
   console.log(`\n🌐 Deploying to ${networkConfig.name}...`);
@@ -357,8 +340,7 @@ async function main() {
   console.log("\n✅ All deployments complete!");
 }
 
-// Add hre import for verification
-import hre from "hardhat";
+// Note: hre import removed - use verify-all.ts script for verification
 
 main()
   .then(() => process.exit(0))

@@ -12,8 +12,8 @@ interface DeploymentAddresses {
   network: string;
 }
 
-async function loadDeployment(networkName: string): Promise<DeploymentAddresses | null> {
-  const filePath = path.join(__dirname, "../../deployments", `${networkName}.json`);
+async function loadDeployment(_networkName: string): Promise<DeploymentAddresses | null> {
+  const filePath = path.join(__dirname, "../../deployments", `${_networkName}.json`);
   if (fs.existsSync(filePath)) {
     return JSON.parse(fs.readFileSync(filePath, "utf-8"));
   }
@@ -23,14 +23,15 @@ async function loadDeployment(networkName: string): Promise<DeploymentAddresses 
 async function emergencyWithdraw(
   contractAddress: string,
   recipient: string,
-  networkName: string
+  _networkName: string
 ): Promise<void> {
   console.log("\n🚨 EMERGENCY WITHDRAWAL");
   console.log(`   Contract: ${contractAddress}`);
   console.log(`   Recipient: ${recipient}`);
 
-  const contract = await ethers.getContractAt("InsurancePool", contractAddress);
-  const [signer] = await ethers.getSigners();
+  // Connect to contract (for future emergency withdrawal implementation)
+  const _contract = await ethers.getContractAt("InsurancePool", contractAddress);
+  const [_signer] = await ethers.getSigners();
 
   // Check current balance
   const balance = await ethers.provider.getBalance(contractAddress);
@@ -58,7 +59,7 @@ async function emergencyWithdraw(
 async function transferOwnership(
   contractAddress: string,
   newOwner: string,
-  networkName: string
+  _networkName: string
 ): Promise<void> {
   console.log("\n👤 TRANSFERRING OWNERSHIP");
   console.log(`   Contract: ${contractAddress}`);
