@@ -76,9 +76,9 @@ export default [
       "no-console": "off",
     },
   },
-  // Scripts configuration - allow console.log in scripts
+  // Scripts and audit configuration - allow console.log in CLI tools
   {
-    files: ["scripts/**/*.ts"],
+    files: ["scripts/**/*.ts", "audit/**/*.ts"],
     rules: {
       "no-console": "off",
     },
