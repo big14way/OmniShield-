@@ -16,22 +16,22 @@
 
 ### Core Team
 
-| Role | Contact | Responsibility |
-|------|---------|----------------|
-| Lead Developer | [Email/Phone] | Technical decision-making |
-| Security Lead | [Email/Phone] | Security assessment & response |
-| Operations Manager | [Email/Phone] | Communication & coordination |
-| Multi-sig Signers | [List] | Emergency transaction approval |
-| Legal Counsel | [Email/Phone] | Legal implications & compliance |
+| Role               | Contact       | Responsibility                  |
+| ------------------ | ------------- | ------------------------------- |
+| Lead Developer     | [Email/Phone] | Technical decision-making       |
+| Security Lead      | [Email/Phone] | Security assessment & response  |
+| Operations Manager | [Email/Phone] | Communication & coordination    |
+| Multi-sig Signers  | [List]        | Emergency transaction approval  |
+| Legal Counsel      | [Email/Phone] | Legal implications & compliance |
 
 ### External Partners
 
-| Partner | Contact | Purpose |
-|---------|---------|---------|
-| Audit Firm | [Email/Phone] | Emergency security consultation |
-| White Hat Group | [Email/Phone] | Vulnerability assessment |
-| Insurance Provider | [Email/Phone] | Claims & liability |
-| Exchange Partners | [Email/Phone] | Trading halt coordination |
+| Partner            | Contact       | Purpose                         |
+| ------------------ | ------------- | ------------------------------- |
+| Audit Firm         | [Email/Phone] | Emergency security consultation |
+| White Hat Group    | [Email/Phone] | Vulnerability assessment        |
+| Insurance Provider | [Email/Phone] | Claims & liability              |
+| Exchange Partners  | [Email/Phone] | Trading halt coordination       |
 
 ### Emergency Hotline
 
@@ -51,6 +51,7 @@
 **Definition**: Immediate threat to user funds or protocol solvency
 
 **Examples**:
+
 - Active exploit draining funds
 - Smart contract vulnerability being exploited
 - Oracle manipulation causing incorrect payouts
@@ -60,6 +61,7 @@
 **Response Time**: Immediate (< 15 minutes)
 
 **Required Actions**:
+
 1. Activate emergency pause immediately
 2. Alert all multi-sig signers
 3. Initiate war room
@@ -73,6 +75,7 @@
 **Definition**: Significant security concern with potential for exploitation
 
 **Examples**:
+
 - Discovered critical vulnerability (not yet exploited)
 - Suspicious transaction patterns
 - Oracle price deviation
@@ -82,6 +85,7 @@
 **Response Time**: < 1 hour
 
 **Required Actions**:
+
 1. Assess threat level
 2. Alert core team
 3. Prepare contingency plan
@@ -95,6 +99,7 @@
 **Definition**: Security or operational issue requiring attention
 
 **Examples**:
+
 - Minor smart contract issues
 - Performance degradation
 - Monitoring system failures
@@ -104,6 +109,7 @@
 **Response Time**: < 4 hours
 
 **Required Actions**:
+
 1. Investigate issue
 2. Document findings
 3. Create fix plan
@@ -117,6 +123,7 @@
 **Definition**: Minor issues with minimal impact
 
 **Examples**:
+
 - UI/UX bugs
 - Documentation errors
 - Non-critical feature requests
@@ -125,6 +132,7 @@
 **Response Time**: < 24 hours
 
 **Required Actions**:
+
 1. Log issue
 2. Add to backlog
 3. Fix in next sprint
@@ -136,6 +144,7 @@
 ### When to Pause
 
 **Automatic Triggers** (if monitoring enabled):
+
 - Unexpected drain of >10% pool funds in <1 hour
 - Oracle price deviation >20%
 - Failed claim payment transactions
@@ -143,6 +152,7 @@
 - Bridge connectivity loss >30 minutes
 
 **Manual Triggers**:
+
 - Discovery of critical vulnerability
 - Suspicious activity patterns
 - Audit firm recommendation
@@ -169,6 +179,7 @@ npx hardhat run scripts/emergency/pause-all.ts --network <network>
 #### Method 2: Multi-sig Execution
 
 1. **Prepare pause transaction**:
+
    ```bash
    npx hardhat run scripts/emergency/prepare-pause-tx.ts
    ```
@@ -189,10 +200,7 @@ npx hardhat run scripts/emergency/pause-all.ts --network <network>
 
 ```typescript
 // Connect to contract
-const insurancePool = await ethers.getContractAt(
-  "InsurancePool", 
-  INSURANCE_POOL_ADDRESS
-);
+const insurancePool = await ethers.getContractAt("InsurancePool", INSURANCE_POOL_ADDRESS);
 
 // Execute pause (owner only)
 const tx = await insurancePool.pause();
@@ -204,6 +212,7 @@ console.log("Emergency pause activated");
 ### Post-Pause Actions
 
 **Immediate (Within 15 minutes)**:
+
 1. ✅ Verify all contracts are paused
 2. ✅ Run monitoring dashboard to assess damage
 3. ✅ Capture blockchain state for forensics
@@ -211,6 +220,7 @@ console.log("Emergency pause activated");
 5. ✅ Post initial communication
 
 **Short-term (Within 1 hour)**:
+
 1. ✅ Complete security assessment
 2. ✅ Identify root cause
 3. ✅ Develop fix plan
@@ -218,6 +228,7 @@ console.log("Emergency pause activated");
 5. ✅ Contact audit firm if needed
 
 **Medium-term (Within 24 hours)**:
+
 1. ✅ Deploy fixes
 2. ✅ Complete security review
 3. ✅ Test unpause procedure
@@ -227,6 +238,7 @@ console.log("Emergency pause activated");
 ### Unpause Procedures
 
 **Pre-Unpause Checklist**:
+
 - [ ] Root cause identified and fixed
 - [ ] Security review completed
 - [ ] Fix deployed and verified
@@ -237,6 +249,7 @@ console.log("Emergency pause activated");
 - [ ] Legal review completed (if needed)
 
 **Unpause Execution**:
+
 ```bash
 # Set environment
 export ACTION=unpause
@@ -250,6 +263,7 @@ npx hardhat run scripts/emergency/pause-all.ts --network <network>
 ```
 
 **Post-Unpause Monitoring** (First 24 hours):
+
 - Monitor all transactions closely
 - Watch for unusual patterns
 - Check oracle health continuously
@@ -264,12 +278,14 @@ npx hardhat run scripts/emergency/pause-all.ts --network <network>
 ### Scenario 1: Funds Stuck in Contract
 
 **Assessment**:
+
 1. Identify locked amount
 2. Determine lock reason
 3. Check contract state
 4. Review transaction history
 
 **Recovery Steps**:
+
 ```typescript
 // Option A: Normal withdrawal (if possible)
 const tx = await contract.withdrawStuckFunds(amount, recipient);
@@ -286,6 +302,7 @@ const tx = await contract.emergencyWithdraw(amount, recipient);
 ### Scenario 2: Exploited Funds
 
 **Immediate Actions**:
+
 1. **Pause all contracts** immediately
 2. **Identify exploiter address(es)**
 3. **Calculate total loss**
@@ -293,6 +310,7 @@ const tx = await contract.emergencyWithdraw(amount, recipient);
 5. **File police report** if significant amount
 
 **White Hat Negotiations**:
+
 - Offer bug bounty reward
 - Negotiate return terms
 - Draft legal agreement
@@ -300,7 +318,8 @@ const tx = await contract.emergencyWithdraw(amount, recipient);
 - Prepare public acknowledgment
 
 **Blackhat Response**:
-1. **Legal action**: 
+
+1. **Legal action**:
    - File lawsuit
    - Work with law enforcement
    - Blockchain forensics
@@ -319,6 +338,7 @@ const tx = await contract.emergencyWithdraw(amount, recipient);
 ### Scenario 3: Oracle Manipulation
 
 **Detection**:
+
 ```bash
 # Check oracle health
 npx hardhat run scripts/monitor/dashboard.ts
@@ -328,6 +348,7 @@ curl https://xc-testnet.pyth.network/api/latest_price_feeds
 ```
 
 **Response**:
+
 1. Switch to backup oracle
 2. Pause price-dependent functions
 3. Review affected transactions
@@ -352,11 +373,13 @@ IMPACT: [Describe what users can/cannot do]
 USER FUNDS: [Status of fund safety]
 
 NEXT STEPS:
+
 - Our team is investigating
 - Updates every [FREQUENCY]
 - Expected resolution: [TIMEFRAME or TBD]
 
 OFFICIAL CHANNELS ONLY:
+
 - Twitter: @OmniShield
 - Discord: [Link]
 - Blog: [Link]
@@ -382,6 +405,7 @@ ROOT CAUSE:
 [Technical explanation in accessible language]
 
 IMPACT:
+
 - Total affected: [Amount]
 - Affected users: [Number]
 - Recovery plan: [Details]
@@ -406,12 +430,14 @@ We apologize for the disruption and thank the community for patience.
 We're pleased to announce that OmniShield Protocol has been successfully restored and is now operational.
 
 SUMMARY:
+
 - Duration: [X hours]
 - Issue: [Brief description]
 - Resolution: [What was fixed]
 - User impact: [Details]
 
 IMPROVEMENTS:
+
 - [Security enhancement 1]
 - [Security enhancement 2]
 - [Monitoring improvement]
@@ -474,28 +500,31 @@ We apologize for any inconvenience. Safety and security remain our top priority.
 
 ## Timeline (All times UTC)
 
-| Time | Event |
-|------|-------|
-| HH:MM | Initial detection |
-| HH:MM | Team alerted |
-| HH:MM | Pause activated |
-| HH:MM | Root cause identified |
-| HH:MM | Fix implemented |
+| Time  | Event                     |
+| ----- | ------------------------- |
+| HH:MM | Initial detection         |
+| HH:MM | Team alerted              |
+| HH:MM | Pause activated           |
+| HH:MM | Root cause identified     |
+| HH:MM | Fix implemented           |
 | HH:MM | Security review completed |
-| HH:MM | Protocol resumed |
+| HH:MM | Protocol resumed          |
 
 ## Impact
 
 ### Users Affected
+
 - Total users: [Number]
 - Funds at risk: [Amount]
 - Actual loss: [Amount]
 
 ### System Affected
+
 - [Contract/Component 1]
 - [Contract/Component 2]
 
 ### Business Impact
+
 - Downtime: [Duration]
 - Revenue loss: [Amount]
 - Reputational: [Assessment]
@@ -503,54 +532,66 @@ We apologize for any inconvenience. Safety and security remain our top priority.
 ## Root Cause Analysis
 
 ### What Happened
+
 [Detailed technical explanation]
 
 ### Why It Happened
+
 [Contributing factors]
 
 ### Why It Wasn't Caught Earlier
+
 [Detection gaps]
 
 ## Resolution
 
 ### Immediate Fix
+
 [What was done to resolve]
 
 ### Verification
+
 [How fix was verified]
 
 ### Long-term Solutions
+
 [Permanent fixes being implemented]
 
 ## Lessons Learned
 
 ### What Went Well
+
 - [Positive aspect 1]
 - [Positive aspect 2]
 
 ### What Went Wrong
+
 - [Issue 1]
 - [Issue 2]
 
 ### Where We Got Lucky
+
 - [Fortunate circumstance 1]
 
 ## Action Items
 
-| Action | Owner | Priority | Due Date | Status |
-|--------|-------|----------|----------|--------|
-| [Action 1] | [Name] | P0 | [Date] | ⬜ |
-| [Action 2] | [Name] | P1 | [Date] | ⬜ |
+| Action     | Owner  | Priority | Due Date | Status |
+| ---------- | ------ | -------- | -------- | ------ |
+| [Action 1] | [Name] | P0       | [Date]   | ⬜     |
+| [Action 2] | [Name] | P1       | [Date]   | ⬜     |
 
 ## Appendix
 
 ### Supporting Data
+
 [Links to logs, transactions, charts]
 
 ### Related Incidents
+
 [Links to similar past incidents]
 
 ### References
+
 [External resources, similar incidents in other protocols]
 ```
 
@@ -563,11 +604,13 @@ We apologize for any inconvenience. Safety and security remain our top priority.
 #### 1. Emergency Hotfix
 
 **Criteria**:
+
 - Critical security vulnerability
 - Active exploit
 - Data loss risk
 
 **Process**:
+
 1. Deploy fix immediately
 2. Minimal testing (regression only)
 3. Single-signer approval acceptable
@@ -576,11 +619,13 @@ We apologize for any inconvenience. Safety and security remain our top priority.
 #### 2. Urgent Upgrade
 
 **Criteria**:
+
 - Important security fix
 - Significant bug
 - Performance issue
 
 **Process**:
+
 1. Deploy within 24-48 hours
 2. Essential testing
 3. 2-of-3 multi-sig approval
@@ -589,11 +634,13 @@ We apologize for any inconvenience. Safety and security remain our top priority.
 #### 3. Standard Upgrade
 
 **Criteria**:
+
 - New features
 - Optimizations
 - Non-critical fixes
 
 **Process**:
+
 1. Full testing suite
 2. Complete audit
 3. Standard multi-sig approval
@@ -603,6 +650,7 @@ We apologize for any inconvenience. Safety and security remain our top priority.
 ### Upgrade Checklist
 
 **Pre-Deployment**:
+
 - [ ] Code complete and reviewed
 - [ ] All tests passing (unit, integration, e2e)
 - [ ] Test coverage >90%
@@ -613,6 +661,7 @@ We apologize for any inconvenience. Safety and security remain our top priority.
 - [ ] Rollback plan ready
 
 **Deployment**:
+
 - [ ] Deploy to testnet first
 - [ ] Verify contract code
 - [ ] Run smoke tests
@@ -623,6 +672,7 @@ We apologize for any inconvenience. Safety and security remain our top priority.
 - [ ] Verify all configurations
 
 **Post-Deployment**:
+
 - [ ] Run monitoring dashboard
 - [ ] Verify all functions work
 - [ ] Check event emissions
@@ -635,6 +685,7 @@ We apologize for any inconvenience. Safety and security remain our top priority.
 ### Rollback Procedures
 
 **When to Rollback**:
+
 - Critical bug discovered post-deployment
 - Unexpected behavior
 - Integration failures
@@ -643,12 +694,14 @@ We apologize for any inconvenience. Safety and security remain our top priority.
 **Rollback Methods**:
 
 **Option 1: Proxy Revert**
+
 ```typescript
 // Revert proxy to previous implementation
 await proxy.upgradeTo(previousImplementation);
 ```
 
 **Option 2: Emergency Pause**
+
 ```typescript
 // Pause new contract
 await newContract.pause();
@@ -657,6 +710,7 @@ await newContract.pause();
 ```
 
 **Option 3: Contract Migration**
+
 ```typescript
 // Deploy fixed version
 // Migrate state if needed
@@ -703,7 +757,7 @@ npx hardhat run scripts/monitor/check-tvl.ts --network mainnet
 # Emergency pause all contracts
 npm run emergency:pause
 
-# Unpause all contracts  
+# Unpause all contracts
 npm run emergency:unpause
 
 # Check pause status

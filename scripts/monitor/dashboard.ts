@@ -76,9 +76,7 @@ class MonitoringDashboard {
     console.log(`Total Coverage Volume: ${ethers.formatEther(totalCoverageVolume)} ETH`);
 
     const utilization =
-      totalPoolBalance > 0n
-        ? Number((totalCoverageVolume * 10000n) / totalPoolBalance) / 100
-        : 0;
+      totalPoolBalance > 0n ? Number((totalCoverageVolume * 10000n) / totalPoolBalance) / 100 : 0;
     console.log(`Utilization Rate: ${utilization.toFixed(2)}%`);
 
     if (utilization > this.alertConfig.utilizationThreshold) {
@@ -199,9 +197,7 @@ class MonitoringDashboard {
     console.log("\n=== Cross-Chain Bridge Status ===");
 
     try {
-      const bridgeBalance = await ethers.provider.getBalance(
-        await this.insurancePool.getAddress()
-      );
+      const bridgeBalance = await ethers.provider.getBalance(await this.insurancePool.getAddress());
       console.log(`Bridge Balance: ${ethers.formatEther(bridgeBalance)} ETH`);
 
       if (bridgeBalance < ethers.parseEther("1")) {
@@ -288,22 +284,14 @@ async function main() {
 
   const insurancePool = await ethers.getContractAt("InsurancePool", insurancePoolAddress);
   const riskEngine = await ethers.getContractAt("RiskEngine", riskEngineAddress);
-  const claimsProcessor = await ethers.getContractAt(
-    "ClaimsProcessor",
-    claimsProcessorAddress
-  );
+  const claimsProcessor = await ethers.getContractAt("ClaimsProcessor", claimsProcessorAddress);
 
   let pythOracle;
   if (pythOracleAddress) {
     pythOracle = await ethers.getContractAt("IPyth", pythOracleAddress);
   }
 
-  const dashboard = new MonitoringDashboard(
-    insurancePool,
-    riskEngine,
-    claimsProcessor,
-    pythOracle
-  );
+  const dashboard = new MonitoringDashboard(insurancePool, riskEngine, claimsProcessor, pythOracle);
 
   const monitoringInterval = parseInt(process.env.MONITORING_INTERVAL || "300000");
   const continuous = process.env.CONTINUOUS_MONITORING === "true";

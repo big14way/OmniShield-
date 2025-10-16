@@ -118,10 +118,7 @@ class AuditPreparation {
 
   private getCompilerVersion(): string {
     try {
-      const hardhatConfig = fs.readFileSync(
-        path.join(__dirname, "../hardhat.config.ts"),
-        "utf-8"
-      );
+      const hardhatConfig = fs.readFileSync(path.join(__dirname, "../hardhat.config.ts"), "utf-8");
       const match = hardhatConfig.match(/version:\s*["']([^"']+)["']/);
       return match ? match[1] : "0.8.24";
     } catch {
@@ -379,7 +376,10 @@ ${auditPackage.contracts
 - **Dependencies**: ${c.dependencies.length}
 
 **Key Functions**:
-${c.functions.slice(0, 10).map((f) => `- ${f}`).join("\n")}
+${c.functions
+  .slice(0, 10)
+  .map((f) => `- ${f}`)
+  .join("\n")}
 
 **Events**:
 ${c.events.map((e) => `- ${e}`).join("\n")}

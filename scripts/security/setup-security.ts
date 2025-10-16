@@ -33,9 +33,7 @@ class SecuritySetup {
       const GnosisSafeFactory = await ethers.getContractFactory("GnosisSafe").catch(() => null);
 
       if (!GnosisSafeFactory) {
-        console.log(
-          "⚠️  Gnosis Safe contract not found. Using manual deployment instructions:"
-        );
+        console.log("⚠️  Gnosis Safe contract not found. Using manual deployment instructions:");
         console.log("\n1. Deploy Gnosis Safe via their UI:");
         console.log("   - Visit: https://app.safe.global/");
         console.log(`   - Add owners: ${this.config.multisigOwners.join(", ")}`);
@@ -69,12 +67,7 @@ class SecuritySetup {
       const executors = this.config.multisigOwners;
       const admin = ethers.ZeroAddress;
 
-      const timelock = await TimelockController.deploy(
-        minDelay,
-        proposers,
-        executors,
-        admin
-      );
+      const timelock = await TimelockController.deploy(minDelay, proposers, executors, admin);
       await timelock.waitForDeployment();
       const timelockAddress = await timelock.getAddress();
 
@@ -230,8 +223,7 @@ class SecuritySetup {
     console.log("   Or: npx hardhat run scripts/emergency/pause-all.ts");
 
     try {
-      const isPausable =
-        (await this.contracts.insurancePool.paused?.().catch(() => null)) !== null;
+      const isPausable = (await this.contracts.insurancePool.paused?.().catch(() => null)) !== null;
 
       if (isPausable) {
         const isPaused = await this.contracts.insurancePool.paused();
@@ -293,10 +285,7 @@ async function main() {
 
   const insurancePool = await ethers.getContractAt("InsurancePool", insurancePoolAddress);
   const riskEngine = await ethers.getContractAt("RiskEngine", riskEngineAddress);
-  const claimsProcessor = await ethers.getContractAt(
-    "ClaimsProcessor",
-    claimsProcessorAddress
-  );
+  const claimsProcessor = await ethers.getContractAt("ClaimsProcessor", claimsProcessorAddress);
 
   let hederaBridge;
   if (hederaBridgeAddress) {

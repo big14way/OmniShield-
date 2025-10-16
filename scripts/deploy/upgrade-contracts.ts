@@ -1,4 +1,10 @@
-import { ethers, upgrades } from "hardhat";
+// Note: OpenZeppelin Hardhat Upgrades plugin not installed
+// Install with: npm install --save-dev @openzeppelin/hardhat-upgrades
+// Add to hardhat.config.ts: import '@openzeppelin/hardhat-upgrades'
+// Then uncomment below:
+// import { ethers, upgrades } from "hardhat";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { ethers } from "hardhat";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -29,47 +35,46 @@ async function loadDeployment(networkName: string): Promise<DeploymentAddresses 
   return null;
 }
 
-async function saveUpgradeRecord(networkName: string, record: UpgradeRecord): Promise<void> {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function saveUpgradeRecord(_networkName: string, _record: UpgradeRecord): Promise<void> {
+  console.log("  ℹ️  Upgrade record tracking disabled (upgrades plugin not installed)");
+  // Uncomment below when upgrades plugin is installed:
+  /*
   const upgradesDir = path.join(__dirname, "../../deployments/upgrades");
   if (!fs.existsSync(upgradesDir)) {
     fs.mkdirSync(upgradesDir, { recursive: true });
   }
 
-  const filePath = path.join(upgradesDir, `${networkName}-upgrades.json`);
+  const filePath = path.join(upgradesDir, `${_networkName}-upgrades.json`);
   let upgrades: UpgradeRecord[] = [];
 
   if (fs.existsSync(filePath)) {
     upgrades = JSON.parse(fs.readFileSync(filePath, "utf-8"));
   }
 
-  upgrades.push(record);
+  upgrades.push(_record);
   fs.writeFileSync(filePath, JSON.stringify(upgrades, null, 2));
   console.log(`  💾 Upgrade record saved`);
+  */
 }
 
-async function upgradeInsurancePool(proxyAddress: string, networkName: string): Promise<string> {
+async function upgradeInsurancePool(_proxyAddress: string, _networkName: string): Promise<string> {
   console.log("\n📋 Upgrading InsurancePool...");
-  console.log(`   Proxy: ${proxyAddress}`);
+  console.error("   ❌ OpenZeppelin Hardhat Upgrades plugin not installed");
+  console.error("   Install with: npm install --save-dev @openzeppelin/hardhat-upgrades");
+  console.error("   Add to hardhat.config.ts: import '@openzeppelin/hardhat-upgrades'");
+  throw new Error("Upgrades plugin not available");
 
+  // Uncomment below when upgrades plugin is installed:
+  /*
   const [deployer] = await ethers.getSigners();
-
-  // Get the new implementation
   const InsurancePoolV2 = await ethers.getContractFactory("InsurancePool");
-
-  // Get current implementation address
   const currentImpl = await upgrades.erc1967.getImplementationAddress(proxyAddress);
   console.log(`   Current implementation: ${currentImpl}`);
-
-  // Upgrade the proxy
-  console.log("   🔄 Upgrading...");
   const upgraded = await upgrades.upgradeProxy(proxyAddress, InsurancePoolV2);
   await upgraded.waitForDeployment();
-
-  // Get new implementation address
   const newImpl = await upgrades.erc1967.getImplementationAddress(proxyAddress);
   console.log(`   ✅ New implementation: ${newImpl}`);
-
-  // Save upgrade record
   await saveUpgradeRecord(networkName, {
     timestamp: Date.now(),
     previousImplementation: currentImpl,
@@ -78,27 +83,25 @@ async function upgradeInsurancePool(proxyAddress: string, networkName: string): 
     contractName: "InsurancePool",
     upgrader: deployer.address,
   });
-
   return newImpl;
+  */
 }
 
-async function upgradeRiskEngine(proxyAddress: string, networkName: string): Promise<string> {
+async function upgradeRiskEngine(_proxyAddress: string, _networkName: string): Promise<string> {
   console.log("\n📋 Upgrading RiskEngine...");
-  console.log(`   Proxy: ${proxyAddress}`);
+  console.error("   ❌ OpenZeppelin Hardhat Upgrades plugin not installed");
+  throw new Error("Upgrades plugin not available");
 
+  // Uncomment below when upgrades plugin is installed:
+  /*
   const [deployer] = await ethers.getSigners();
-
   const RiskEngineV2 = await ethers.getContractFactory("RiskEngine");
   const currentImpl = await upgrades.erc1967.getImplementationAddress(proxyAddress);
   console.log(`   Current implementation: ${currentImpl}`);
-
-  console.log("   🔄 Upgrading...");
   const upgraded = await upgrades.upgradeProxy(proxyAddress, RiskEngineV2);
   await upgraded.waitForDeployment();
-
   const newImpl = await upgrades.erc1967.getImplementationAddress(proxyAddress);
   console.log(`   ✅ New implementation: ${newImpl}`);
-
   await saveUpgradeRecord(networkName, {
     timestamp: Date.now(),
     previousImplementation: currentImpl,
@@ -107,13 +110,17 @@ async function upgradeRiskEngine(proxyAddress: string, networkName: string): Pro
     contractName: "RiskEngine",
     upgrader: deployer.address,
   });
-
   return newImpl;
+  */
 }
 
-async function validateUpgrade(proxyAddress: string, contractName: string): Promise<boolean> {
+async function validateUpgrade(_proxyAddress: string, contractName: string): Promise<boolean> {
   console.log(`\n🔍 Validating ${contractName} upgrade...`);
+  console.error("   ❌ OpenZeppelin Hardhat Upgrades plugin not installed");
+  return false;
 
+  // Uncomment below when upgrades plugin is installed:
+  /*
   try {
     const ContractFactory = await ethers.getContractFactory(contractName);
     await upgrades.validateUpgrade(proxyAddress, ContractFactory);
@@ -123,18 +130,21 @@ async function validateUpgrade(proxyAddress: string, contractName: string): Prom
     console.error(`   ❌ Upgrade validation failed: ${error.message}`);
     return false;
   }
+  */
 }
 
 async function proposeUpgrade(
-  proxyAddress: string,
+  _proxyAddress: string,
   contractName: string,
   multisigAddress: string
 ): Promise<void> {
   console.log(`\n📝 Proposing ${contractName} upgrade to multisig...`);
   console.log(`   Multisig: ${multisigAddress}`);
+  console.error("   ❌ OpenZeppelin Hardhat Upgrades plugin not installed");
 
+  // Uncomment below when upgrades plugin is installed:
+  /*
   const ContractFactory = await ethers.getContractFactory(contractName);
-
   try {
     const proposal = await upgrades.prepareUpgrade(proxyAddress, ContractFactory);
     console.log(`   ✅ Upgrade proposal prepared`);
@@ -145,19 +155,23 @@ async function proposeUpgrade(
   } catch (error: any) {
     console.error(`   ❌ Proposal failed: ${error.message}`);
   }
+  */
 }
 
-async function forceImportProxy(proxyAddress: string, contractName: string): Promise<void> {
+async function forceImportProxy(_proxyAddress: string, contractName: string): Promise<void> {
   console.log(`\n🔄 Force importing ${contractName} proxy...`);
+  console.error("   ❌ OpenZeppelin Hardhat Upgrades plugin not installed");
 
+  // Uncomment below when upgrades plugin is installed:
+  /*
   const ContractFactory = await ethers.getContractFactory(contractName);
-
   try {
     await upgrades.forceImport(proxyAddress, ContractFactory);
     console.log("   ✅ Proxy imported successfully");
   } catch (error: any) {
     console.error(`   ❌ Import failed: ${error.message}`);
   }
+  */
 }
 
 async function main() {
