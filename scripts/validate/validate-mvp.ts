@@ -1,5 +1,4 @@
 import { ethers } from "hardhat";
-import { execSync } from "child_process";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -87,7 +86,7 @@ class MVPValidator {
       const insurancePool = await ethers.getContractAt("InsurancePool", deployment.insurancePool);
       await insurancePool.owner();
       this.addResult("Smart Contracts", "Contracts accessible on-chain", "PASS");
-    } catch (error) {
+    } catch {
       this.addResult(
         "Smart Contracts",
         "Contracts accessible on-chain",
