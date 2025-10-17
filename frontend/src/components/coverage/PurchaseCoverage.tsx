@@ -52,7 +52,7 @@ export function PurchaseCoverage() {
     durationSeconds
   );
 
-  const { purchaseCoverage, isPending, isSuccess, hash } = usePurchaseCoverage();
+  const { purchaseCoverage, isPending, isSuccess, hash, error: purchaseError } = usePurchaseCoverage();
 
   const usdValue = assetPrice ? parseFloat(coverageAmount || "0") * assetPrice.price : 0;
   
@@ -67,9 +67,19 @@ export function PurchaseCoverage() {
     if (!premium || !isConnected) return;
 
     try {
-      await purchaseCoverage(coverageAmountWei, durationSeconds, premium);
+      console.log("🔵 Starting purchase...", {
+        coverageAmount: coverageAmount,
+        duration: duration,
+        premium: formatEther(premium),
+      });
+      
+      const txHash = await purchaseCoverage(coverageAmountWei, durationSeconds, premium);
+      
+      console.log("✅ Transaction submitted:", txHash);
     } catch (error) {
-      console.error("Failed to purchase coverage:", error);
+      console.error("❌ Failed to purchase coverage:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      alert(`Transaction failed: ${errorMessage}`);
     }
   };
 
@@ -285,6 +295,12 @@ export function PurchaseCoverage() {
         successMessage="Coverage purchased successfully! Your policy is now active."
         pendingMessage="Purchasing coverage..."
       />
+
+      {purchaseError && (
+        <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">
+          ❌ Transaction failed: {purchaseError instanceof Error ? purchaseError.message : "Unknown error"}
+        </div>
+      )}
     </div>
   );
 }

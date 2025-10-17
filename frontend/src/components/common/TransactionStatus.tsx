@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useWaitForTransactionReceipt } from "wagmi";
 import { TransactionLink } from "./TransactionLink";
 
@@ -22,16 +23,31 @@ export function TransactionStatus({
   successMessage = "Transaction successful!",
   pendingMessage = "Processing transaction...",
 }: TransactionStatusProps) {
-  const { isLoading: isWaiting, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+  const { isLoading: isWaiting, isSuccess: isConfirmed, error } = useWaitForTransactionReceipt({
     hash,
   });
 
   const isTransactionPending = isPending || isConfirming || isWaiting;
   const isTransactionSuccess = isSuccess || isConfirmed;
 
-  if (isTransactionSuccess && onSuccess) {
-    onSuccess();
-  }
+  useEffect(() => {
+    if (hash) {
+      console.log("📊 Transaction status update:", {
+        hash,
+        pending: isTransactionPending,
+        success: isTransactionSuccess,
+        waiting: isWaiting,
+        error: error?.message,
+      });
+    }
+  }, [hash, isTransactionPending, isTransactionSuccess, isWaiting, error]);
+
+  useEffect(() => {
+    if (isTransactionSuccess && onSuccess) {
+      console.log("✅ Transaction successful, calling onSuccess callback");
+      onSuccess();
+    }
+  }, [isTransactionSuccess, onSuccess]);
 
   if (!hash && !isTransactionPending && !isTransactionSuccess) {
     return null;

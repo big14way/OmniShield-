@@ -69,15 +69,25 @@ export function usePoolBalance() {
 
 export function usePurchaseCoverage() {
   const { address, abi } = useInsurancePool();
-  const { writeContractAsync, data: hash, isPending } = useWriteContract();
+  const { writeContractAsync, data: hash, isPending, error: writeError } = useWriteContract();
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+  const { isLoading: isConfirming, isSuccess, error: receiptError } = useWaitForTransactionReceipt({
     hash,
   });
 
   const purchaseCoverage = async (coverageAmount: bigint, duration: bigint, premium: bigint) => {
-    if (!address) throw new Error("Contract address not found");
+    if (!address) {
+      console.error("❌ Contract address not found");
+      throw new Error("Contract address not found");
+    }
+
+    console.log("📝 Preparing transaction...", {
+      address,
+      coverageAmount: coverageAmount.toString(),
+      duration: duration.toString(),
+      premium: premium.toString(),
+    });
 
     setIsProcessing(true);
     try {
@@ -88,17 +98,34 @@ export function usePurchaseCoverage() {
         args: [coverageAmount, duration],
         value: premium,
       });
+      
+      console.log("✅ Transaction hash:", result);
       return result;
+    } catch (error) {
+      console.error("❌ Transaction failed:", error);
+      throw error;
     } finally {
       setIsProcessing(false);
     }
   };
+
+  // Log status changes
+  if (hash && isConfirming) {
+    console.log("⏳ Waiting for confirmation...", hash);
+  }
+  if (isSuccess && hash) {
+    console.log("🎉 Transaction confirmed!", hash);
+  }
+  if (writeError || receiptError) {
+    console.error("❌ Transaction error:", writeError || receiptError);
+  }
 
   return {
     purchaseCoverage,
     isPending: isPending || isConfirming || isProcessing,
     isSuccess,
     hash,
+    error: writeError || receiptError,
   };
 }
 
