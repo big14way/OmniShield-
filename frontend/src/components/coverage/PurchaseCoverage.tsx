@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useAccount } from "wagmi";
+import { useAccount, useSwitchChain } from "wagmi";
 import { parseEther, formatEther } from "viem";
 import { usePremiumCalculator, usePurchaseCoverage } from "@/lib/web3/hooks";
 import { useAssetPrice } from "@/lib/hooks/usePrices";
@@ -37,6 +37,7 @@ const COVERAGE_TYPES = [
 
 export function PurchaseCoverage() {
   const { isConnected } = useAccount();
+  const { switchChain } = useSwitchChain();
   const [selectedAsset, setSelectedAsset] = useState(ASSETS[0]);
   const [coverageAmount, setCoverageAmount] = useState("10");
   const [duration, setDuration] = useState(30); // days
@@ -52,11 +53,17 @@ export function PurchaseCoverage() {
   );
 
   const { purchaseCoverage, isPending, isSuccess, hash } = usePurchaseCoverage();
+  const { chain } = useAccount();
+  const { switchChain } = useSwitchChain();
 
   const usdValue = assetPrice ? parseFloat(coverageAmount || "0") * assetPrice.price : 0;
   
   const hasValidAmount = coverageAmount && parseFloat(coverageAmount) > 0;
-  const canPurchase = isConnected && hasValidAmount && !isPending && !isPremiumLoading;
+  const canPurchase = isConnected && isValidChain && hasValidAmount && !isPending && !isPremiumLoading;
+
+  const handleSwitchToHedera = () => {
+    switchChain?.({ chainId: 296 });
+  };
 
   const handlePurchase = async () => {
     if (!premium || !isConnected) return;
@@ -81,6 +88,28 @@ export function PurchaseCoverage() {
         <h2 className="text-2xl font-bold mb-2">Purchase Coverage</h2>
         <p className="text-gray-600">Protect your crypto assets with parametric insurance</p>
       </div>
+
+      {/* Network Warning - Show prominently if wrong network */}
+      {isConnected && !isValidChain && (
+        <div className="p-6 bg-red-50 border-2 border-red-300 rounded-xl">
+          <div className="flex items-start gap-4">
+            <div className="text-4xl">⚠️</div>
+            <div className="flex-1">
+              <h3 className="text-lg font-bold text-red-900 mb-2">Wrong Network!</h3>
+              <p className="text-red-800 mb-4">
+                You&apos;re currently on <strong>{chain?.name || 'Unknown Network'}</strong>. 
+                OmniShield contracts are deployed on <strong>Hedera Testnet</strong>.
+              </p>
+              <button
+                onClick={handleSwitchToHedera}
+                className="px-6 py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Switch to Hedera Testnet (Chain ID: 296)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Asset Selector */}
       <div>
@@ -215,7 +244,8 @@ export function PurchaseCoverage() {
         <div className="p-3 bg-gray-100 rounded-lg text-xs space-y-1">
           <div><strong>Debug Info:</strong></div>
           <div>• Connected: {isConnected ? '✅' : '❌'}</div>
-          <div>• Valid Chain: {isValidChain ? '✅' : '❌'}</div>
+          <div>• Current Chain: {chain?.name || 'Unknown'} (ID: {chain?.id || 'N/A'})</div>
+          <div>• Valid Chain (Hedera 296): {isValidChain ? '✅' : '❌'}</div>
           <div>• Coverage Amount: {coverageAmount || 'empty'}</div>
           <div>• Premium Loading: {isPremiumLoading ? '⏳' : '✅'}</div>
           <div>• Premium: {premium ? formatEther(premium) : 'null'} HBAR</div>
@@ -225,12 +255,14 @@ export function PurchaseCoverage() {
 
       {/* Transaction Button */}
       <button
-        onClick={handlePurchase}
-        disabled={!canPurchase}
+        onClick={isConnected && !isValidChain ? handleSwitchToHedera : handlePurchase}
+        disabled={!isConnected || (isValidChain && !canPurchase)}
         className="w-full py-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
       >
         {!isConnected
           ? "Connect Wallet"
+          : !isValidChain
+          ? "Switch to Hedera Testnet"
           : isPending
           ? "Processing..."
           : isPremiumLoading
@@ -241,12 +273,6 @@ export function PurchaseCoverage() {
           ? `Purchase Coverage for ${formatEther(premium)} HBAR`
           : "Purchase Coverage"}
       </button>
-
-      {isConnected && !isValidChain && (
-        <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800 text-sm">
-          ⚠️ Please connect to <strong>Hedera Testnet (Chain ID: 296)</strong> to purchase coverage. Switch networks in your wallet.
-        </div>
-      )}
 
       {isConnected && isValidChain && !isPremiumLoading && hasValidAmount && (!premium || premium === 0n) && (
         <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">
