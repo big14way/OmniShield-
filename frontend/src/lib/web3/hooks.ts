@@ -75,6 +75,7 @@ export function usePurchaseCoverage() {
   const { writeContractAsync, data: hash, isPending, error: writeError } = useWriteContract();
   const [isProcessing, setIsProcessing] = useState(false);
   const [manualSuccess, setManualSuccess] = useState(false);
+  const [manualError, setManualError] = useState<Error | null>(null);
   const [policyId, setPolicyId] = useState<bigint | null>(null);
 
   // Disable waitForTransactionReceipt for Hedera (chain 296) due to RPC incompatibility
@@ -120,14 +121,24 @@ export function usePurchaseCoverage() {
         console.log("🔷 Hedera transaction - marking success immediately");
         console.log("🔗 Verify on HashScan:", `https://hashscan.io/testnet/tx/${result}`);
         
-        // Try to fetch policy ID from transaction receipt after a delay
+        // Fetch transaction receipt to check if it actually succeeded
         setTimeout(async () => {
-          setManualSuccess(true);
-          
-          // Fetch transaction receipt to get policy ID from events
           try {
             const receipt = await publicClient?.getTransactionReceipt({ hash: result });
             console.log("📄 Transaction receipt:", receipt);
+            
+            // Check transaction status
+            if (receipt?.status === 'reverted' || receipt?.status === 0 || receipt?.status === '0x0') {
+              console.error("❌ Transaction reverted on-chain!");
+              console.error("Receipt:", receipt);
+              setManualError(new Error("Transaction reverted: The contract rejected this transaction. Check if you sent enough premium or if parameters are valid."));
+              setManualSuccess(false);
+              return;
+            }
+            
+            // Transaction succeeded!
+            console.log("✅ Transaction confirmed on-chain with status:", receipt?.status);
+            setManualSuccess(true);
             
             // Look for PolicyCreated event
             if (receipt?.logs && receipt.logs.length > 0) {
@@ -142,10 +153,15 @@ export function usePurchaseCoverage() {
                 }
               }
             }
+            
+            if (!policyId && receipt?.logs.length === 0) {
+              console.warn("⚠️ No events emitted - transaction may have failed silently");
+            }
           } catch (error) {
-            console.warn("⚠️ Could not fetch policy ID from receipt:", error);
+            console.error("❌ Error fetching receipt:", error);
+            setManualError(error instanceof Error ? error : new Error("Failed to verify transaction"));
           }
-        }, 3000); // Wait 3 seconds for tx to be processed
+        }, 4000); // Wait 4 seconds for tx to be fully processed
       }
       
       return result;
@@ -171,11 +187,11 @@ export function usePurchaseCoverage() {
 
   return {
     purchaseCoverage,
-    isPending: isPending || (isConfirming && !manualSuccess && !isHedera) || isProcessing,
+    isPending: isPending || (isConfirming && !manualSuccess && !manualError && !isHedera) || isProcessing,
     isSuccess: isSuccess || manualSuccess,
     hash,
     policyId,
-    error: writeError, // Only return write errors, ignore receipt errors for Hedera
+    error: writeError || manualError,
   };
 }
 
