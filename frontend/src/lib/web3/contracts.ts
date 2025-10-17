@@ -16,8 +16,8 @@ export const CONTRACT_ADDRESSES: Record<number, ContractAddresses> = {
     ccipBridge: "0x0000000000000000000000000000000000000000",
   },
   [hederaTestnet.id]: {
-    insurancePool: "0x0000000000000000000000000000000000000000", // TODO: Add deployed address
-    riskEngine: "0x0000000000000000000000000000000000000000",
+    insurancePool: "0xA7c59f010700930003b33aB25a7a0679C860f29c",
+    riskEngine: "0x22753E4264FDDc6181dc7cce468904A80a363E44",
     pythPriceConsumer: "0x0000000000000000000000000000000000000000",
   },
 };
