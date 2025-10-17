@@ -4,9 +4,10 @@
 
 ## Prerequisites
 
-✅ Node.js 18+ installed  
-✅ MetaMask wallet installed  
+✅ Node.js 18+ installed
+✅ MetaMask or Hedera wallet (HashPack, Blade) installed
 ✅ Sepolia testnet ETH ([Get from faucet](https://sepoliafaucet.com/))
+✅ Hedera testnet HBAR ([Get from portal](https://portal.hedera.com))
 
 ## 3-Step Setup
 
@@ -54,14 +55,36 @@ npm run dev
 
 After setup, you'll have:
 
-✅ Smart contracts deployed to Sepolia testnet  
-✅ Frontend connected to deployed contracts  
-✅ Fully functional DeFi insurance app  
-✅ MetaMask integration working
+✅ Smart contracts deployed to Hedera testnet (already deployed!)
+✅ Smart contracts deployed to Sepolia testnet
+✅ Frontend connected to deployed contracts
+✅ Fully functional DeFi insurance app
+✅ MetaMask & WalletConnect integration working
+
+### ⚡ Hedera Testnet Deployment (LIVE)
+
+**Already deployed and ready to use!**
+
+- InsurancePool: `0xA7c59f010700930003b33aB25a7a0679C860f29c`
+- RiskEngine: `0x22753E4264FDDc6181dc7cce468904A80a363E44`
+- ClaimsProcessor: `0xfaAddC93baf78e89DCf37bA67943E1bE8F37Bb8c`
+- HederaBridge: `0x276C216D241856199A83bf27b2286659e5b877D3`
+
+**HashScan Explorer:** https://hashscan.io/testnet
+**WalletConnect Project ID:** `1eebe528ca0ce94a99ceaa2e915058d7`
 
 ## Using the App
 
 ### 1. Connect Wallet
+
+**Option A: Hedera Testnet (Recommended - Already Deployed)**
+
+- Click "Connect Wallet" button
+- Select your Hedera wallet (HashPack, Blade, Kabila)
+- Switch to Hedera Testnet (Chain ID: 296)
+- Approve connection
+
+**Option B: Sepolia Testnet**
 
 - Click "Connect Wallet" button
 - Select MetaMask
