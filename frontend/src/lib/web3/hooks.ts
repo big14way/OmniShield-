@@ -143,3 +143,5 @@ export function useRiskScore(coverageAmount: bigint, duration: bigint, userAddre
 
   return { riskScore: riskScore as bigint | undefined, isLoading };
 }
+
+export * from "./hooks/useCCIP";

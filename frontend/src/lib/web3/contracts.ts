@@ -5,7 +5,7 @@ export interface ContractAddresses {
   insurancePool: `0x${string}`;
   riskEngine: `0x${string}`;
   pythPriceConsumer: `0x${string}`;
-  ccipBridge?: `0x${string}`;
+  ccipBridge: `0x${string}`;
 }
 
 export const CONTRACT_ADDRESSES: Record<number, ContractAddresses> = {

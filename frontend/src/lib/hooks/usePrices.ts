@@ -13,6 +13,8 @@ export function usePrices(symbols: string[]) {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
+    const symbolsKey = symbols.join(",");
+
     if (symbols.length === 0) {
       setIsLoading(false);
       return;
@@ -21,7 +23,7 @@ export function usePrices(symbols: string[]) {
     const fetchPrices = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch(`/api/prices?symbols=${symbols.join(",")}`);
+        const response = await globalThis.fetch(`/api/prices?symbols=${symbolsKey}`);
         if (!response.ok) throw new Error("Failed to fetch prices");
 
         const data = await response.json();
@@ -35,10 +37,10 @@ export function usePrices(symbols: string[]) {
     };
 
     fetchPrices();
-    const interval = setInterval(fetchPrices, 30000); // Update every 30 seconds
+    const interval = setInterval(fetchPrices, 30000);
 
     return () => clearInterval(interval);
-  }, [symbols.join(",")]);
+  }, [symbols]);
 
   return { prices, isLoading, error };
 }

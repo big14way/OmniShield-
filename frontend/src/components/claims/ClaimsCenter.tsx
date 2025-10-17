@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useAccount } from "wagmi";
 import { formatEther } from "viem";
 import { usePolicy, useSubmitClaim } from "@/lib/web3/hooks";
-import { formatCurrency, formatDuration } from "@/lib/utils";
 
 interface Claim {
   id: number;
@@ -19,50 +18,21 @@ export function ClaimsCenter() {
   const [selectedPolicyId, setSelectedPolicyId] = useState<bigint>(1n);
   const [claimAmount, setClaimAmount] = useState("");
 
-  const { policy, isLoading: isPolicyLoading } = usePolicy(selectedPolicyId);
+  const { policy } = usePolicy(selectedPolicyId);
   const { submitClaim, isPending, isSuccess } = useSubmitClaim();
 
-  // Mock active coverage data - would come from subgraph in production
-  const activeCoverage = [
-    {
-      id: 1,
-      asset: "ETH",
-      amount: "10",
-      type: "Price Protection",
-      startDate: "2025-01-01",
-      endDate: "2025-02-01",
-      premium: "0.05",
-      status: "active" as const,
-    },
-    {
-      id: 2,
-      asset: "BTC",
-      amount: "0.5",
-      type: "Smart Contract",
-      startDate: "2025-01-10",
-      endDate: "2025-04-10",
-      premium: "0.02",
-      status: "active" as const,
-    },
-  ];
+  const activeCoverage: Array<{
+    id: number;
+    asset: string;
+    amount: string;
+    type: string;
+    startDate: string;
+    endDate: string;
+    premium: string;
+    status: "active";
+  }> = [];
 
-  // Mock claims history
-  const claims: Claim[] = [
-    {
-      id: 1,
-      policyId: 1,
-      status: "approved",
-      amount: "5.0",
-      date: "2025-01-15",
-    },
-    {
-      id: 2,
-      policyId: 3,
-      status: "pending",
-      amount: "2.5",
-      date: "2025-01-14",
-    },
-  ];
+  const claims: Claim[] = [];
 
   const handleSubmitClaim = async () => {
     if (!claimAmount || !selectedPolicyId) return;
@@ -157,7 +127,7 @@ export function ClaimsCenter() {
           <div className="bg-gray-50 rounded-xl p-12 text-center">
             <div className="text-6xl mb-4">📋</div>
             <h3 className="text-xl font-semibold mb-2">No Active Coverage</h3>
-            <p className="text-gray-600 mb-4">You don't have any active coverage policies</p>
+            <p className="text-gray-600 mb-4">You don&apos;t have any active coverage policies</p>
             <button className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors">
               Purchase Coverage
             </button>

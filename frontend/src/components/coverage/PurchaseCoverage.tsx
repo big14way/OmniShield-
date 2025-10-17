@@ -35,7 +35,7 @@ const COVERAGE_TYPES = [
 ];
 
 export function PurchaseCoverage() {
-  const { address, isConnected } = useAccount();
+  const { isConnected } = useAccount();
   const [selectedAsset, setSelectedAsset] = useState(ASSETS[0]);
   const [coverageAmount, setCoverageAmount] = useState("10");
   const [duration, setDuration] = useState(30); // days
