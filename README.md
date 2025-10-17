@@ -31,7 +31,7 @@ OmniShield is a decentralized insurance protocol that provides parametric covera
 | HederaBridge    | `0x276C216D241856199A83bf27b2286659e5b877D3` | [View](https://hashscan.io/testnet/contract/0x276C216D241856199A83bf27b2286659e5b877D3) |
 
 **Frontend**: [OmniShield DApp](http://localhost:3000) (run locally)
-**WalletConnect**: Integrated with Project ID `1eebe528ca0ce94a99ceaa2e915058d7`
+**WalletConnect**: Integrated with Project ID ``
 
 ## 📋 Quick Start
 
@@ -543,6 +543,6 @@ This is a hackathon project and is NOT production-ready. Use at your own risk. A
 
 ---
 
-**Built with ❤️ for the Hedera Hackathon**
+**Built with ❤️ ETHOnline 2025 Hackathon**
 
 [Live Demo](http://localhost:3000) | [Documentation](./docs) | [Report Bug](https://github.com/big14way/Omnishieldhackathon/issues) | [Request Feature](https://github.com/big14way/Omnishieldhackathon/issues)
