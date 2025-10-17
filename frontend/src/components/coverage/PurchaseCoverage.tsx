@@ -53,9 +53,10 @@ export function PurchaseCoverage() {
 
   const { purchaseCoverage, isPending, isSuccess, hash } = usePurchaseCoverage();
 
-  const canPurchase = isConnected && premium && premium > 0n && !isPending && !isPremiumLoading;
-
   const usdValue = assetPrice ? parseFloat(coverageAmount || "0") * assetPrice.price : 0;
+  
+  const hasValidAmount = coverageAmount && parseFloat(coverageAmount) > 0;
+  const canPurchase = isConnected && hasValidAmount && !isPending && !isPremiumLoading;
 
   const handlePurchase = async () => {
     if (!premium || !isConnected) return;
@@ -209,6 +210,19 @@ export function PurchaseCoverage() {
         </div>
       </div>
 
+      {/* Debug Info - Remove after testing */}
+      {isConnected && (
+        <div className="p-3 bg-gray-100 rounded-lg text-xs space-y-1">
+          <div><strong>Debug Info:</strong></div>
+          <div>• Connected: {isConnected ? '✅' : '❌'}</div>
+          <div>• Valid Chain: {isValidChain ? '✅' : '❌'}</div>
+          <div>• Coverage Amount: {coverageAmount || 'empty'}</div>
+          <div>• Premium Loading: {isPremiumLoading ? '⏳' : '✅'}</div>
+          <div>• Premium: {premium ? formatEther(premium) : 'null'} HBAR</div>
+          <div>• Can Purchase: {canPurchase ? '✅' : '❌'}</div>
+        </div>
+      )}
+
       {/* Transaction Button */}
       <button
         onClick={handlePurchase}
@@ -221,9 +235,11 @@ export function PurchaseCoverage() {
           ? "Processing..."
           : isPremiumLoading
           ? "Calculating Premium..."
-          : !premium || premium === 0n
-          ? "Enter valid coverage amount"
-          : `Purchase Coverage for ${formatEther(premium)} HBAR`}
+          : !hasValidAmount
+          ? "Enter coverage amount"
+          : premium && premium > 0n
+          ? `Purchase Coverage for ${formatEther(premium)} HBAR`
+          : "Purchase Coverage"}
       </button>
 
       {isConnected && !isValidChain && (
@@ -232,7 +248,7 @@ export function PurchaseCoverage() {
         </div>
       )}
 
-      {isConnected && isValidChain && !isPremiumLoading && coverageAmount && parseFloat(coverageAmount) > 0 && (!premium || premium === 0n) && (
+      {isConnected && isValidChain && !isPremiumLoading && hasValidAmount && (!premium || premium === 0n) && (
         <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">
           ❌ Contract error: Unable to calculate premium. Please try again or contact support.
         </div>
