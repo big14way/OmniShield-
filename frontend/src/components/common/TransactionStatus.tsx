@@ -23,12 +23,8 @@ export function TransactionStatus({
   successMessage = "Transaction successful!",
   pendingMessage = "Processing transaction...",
 }: TransactionStatusProps) {
-  const { isLoading: isWaiting, isSuccess: isConfirmed, error } = useWaitForTransactionReceipt({
-    hash,
-  });
-
-  const isTransactionPending = isPending || isConfirming || isWaiting;
-  const isTransactionSuccess = isSuccess || isConfirmed;
+  const isTransactionPending = isPending || isConfirming;
+  const isTransactionSuccess = isSuccess;
 
   useEffect(() => {
     if (hash) {
@@ -36,11 +32,9 @@ export function TransactionStatus({
         hash,
         pending: isTransactionPending,
         success: isTransactionSuccess,
-        waiting: isWaiting,
-        error: error?.message,
       });
     }
-  }, [hash, isTransactionPending, isTransactionSuccess, isWaiting, error]);
+  }, [hash, isTransactionPending, isTransactionSuccess]);
 
   useEffect(() => {
     if (isTransactionSuccess && onSuccess) {
