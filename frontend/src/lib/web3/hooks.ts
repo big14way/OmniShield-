@@ -77,7 +77,7 @@ export function usePurchaseCoverage() {
   // Disable waitForTransactionReceipt for Hedera (chain 296) due to RPC incompatibility
   const isHedera = chain?.id === 296;
 
-  const { isLoading: isConfirming, isSuccess, error: receiptError } = useWaitForTransactionReceipt({
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash,
     query: {
       enabled: !!hash && !isHedera && !manualSuccess,

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import { useWaitForTransactionReceipt } from "wagmi";
 import { TransactionLink } from "./TransactionLink";
 
 interface TransactionStatusProps {
