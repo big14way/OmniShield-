@@ -145,3 +145,4 @@ export function useRiskScore(coverageAmount: bigint, duration: bigint, userAddre
 }
 
 export * from "./hooks/useCCIP";
+export * from "./hooks/useUserPolicies";

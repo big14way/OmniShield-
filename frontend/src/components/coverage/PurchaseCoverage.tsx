@@ -6,6 +6,7 @@ import { parseEther, formatEther } from "viem";
 import { usePremiumCalculator, usePurchaseCoverage } from "@/lib/web3/hooks";
 import { useAssetPrice } from "@/lib/hooks/usePrices";
 import { formatCurrency, formatDuration } from "@/lib/utils";
+import { TransactionStatus } from "@/components/common/TransactionStatus";
 
 const ASSETS = [
   { symbol: "ETH", name: "Ethereum", icon: "⟠" },
@@ -50,7 +51,7 @@ export function PurchaseCoverage() {
     durationSeconds
   );
 
-  const { purchaseCoverage, isPending, isSuccess } = usePurchaseCoverage();
+  const { purchaseCoverage, isPending, isSuccess, hash } = usePurchaseCoverage();
 
   const usdValue = assetPrice ? parseFloat(coverageAmount || "0") * assetPrice.price : 0;
 
@@ -221,11 +222,13 @@ export function PurchaseCoverage() {
           : "Purchase Coverage"}
       </button>
 
-      {isSuccess && (
-        <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-800">
-          ✅ Coverage purchased successfully!
-        </div>
-      )}
+      <TransactionStatus
+        hash={hash}
+        isPending={isPending}
+        isSuccess={isSuccess}
+        successMessage="Coverage purchased successfully! Your policy is now active."
+        pendingMessage="Purchasing coverage..."
+      />
     </div>
   );
 }
