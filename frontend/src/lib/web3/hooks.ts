@@ -16,17 +16,19 @@ export function useInsurancePool() {
 export function usePremiumCalculator(coverageAmount: bigint, duration: bigint) {
   const { address, abi } = useInsurancePool();
 
+  const isValidAddress = address && address !== "0x0000000000000000000000000000000000000000";
+
   const { data: premium, isLoading } = useReadContract({
-    address,
+    address: isValidAddress ? address : undefined,
     abi,
     functionName: "calculatePremium",
     args: [coverageAmount, duration],
     query: {
-      enabled: !!address && coverageAmount > 0n && duration > 0n,
+      enabled: !!isValidAddress && coverageAmount > 0n && duration > 0n,
     },
   });
 
-  return { premium: premium as bigint | undefined, isLoading };
+  return { premium: premium as bigint | undefined, isLoading, isValidChain: !!isValidAddress };
 }
 
 export function usePolicy(policyId: bigint) {

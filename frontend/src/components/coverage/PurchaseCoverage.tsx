@@ -46,12 +46,14 @@ export function PurchaseCoverage() {
   const coverageAmountWei = parseEther(coverageAmount || "0");
   const durationSeconds = BigInt(duration * 24 * 60 * 60);
 
-  const { premium, isLoading: isPremiumLoading } = usePremiumCalculator(
+  const { premium, isLoading: isPremiumLoading, isValidChain } = usePremiumCalculator(
     coverageAmountWei,
     durationSeconds
   );
 
   const { purchaseCoverage, isPending, isSuccess, hash } = usePurchaseCoverage();
+
+  const canPurchase = isConnected && premium && premium > 0n && !isPending && !isPremiumLoading;
 
   const usdValue = assetPrice ? parseFloat(coverageAmount || "0") * assetPrice.price : 0;
 
@@ -210,7 +212,7 @@ export function PurchaseCoverage() {
       {/* Transaction Button */}
       <button
         onClick={handlePurchase}
-        disabled={!isConnected || !premium || isPending || isPremiumLoading}
+        disabled={!canPurchase}
         className="w-full py-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
       >
         {!isConnected
@@ -219,8 +221,22 @@ export function PurchaseCoverage() {
           ? "Processing..."
           : isPremiumLoading
           ? "Calculating Premium..."
-          : "Purchase Coverage"}
+          : !premium || premium === 0n
+          ? "Enter valid coverage amount"
+          : `Purchase Coverage for ${formatEther(premium)} HBAR`}
       </button>
+
+      {isConnected && !isValidChain && (
+        <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800 text-sm">
+          ⚠️ Please connect to <strong>Hedera Testnet (Chain ID: 296)</strong> to purchase coverage. Switch networks in your wallet.
+        </div>
+      )}
+
+      {isConnected && isValidChain && !isPremiumLoading && coverageAmount && parseFloat(coverageAmount) > 0 && (!premium || premium === 0n) && (
+        <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">
+          ❌ Contract error: Unable to calculate premium. Please try again or contact support.
+        </div>
+      )}
 
       <TransactionStatus
         hash={hash}
