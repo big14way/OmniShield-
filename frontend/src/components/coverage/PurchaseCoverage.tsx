@@ -36,7 +36,7 @@ const COVERAGE_TYPES = [
 ];
 
 export function PurchaseCoverage() {
-  const { isConnected } = useAccount();
+  const { isConnected, chain } = useAccount();
   const { switchChain } = useSwitchChain();
   const [selectedAsset, setSelectedAsset] = useState(ASSETS[0]);
   const [coverageAmount, setCoverageAmount] = useState("10");
@@ -53,8 +53,6 @@ export function PurchaseCoverage() {
   );
 
   const { purchaseCoverage, isPending, isSuccess, hash } = usePurchaseCoverage();
-  const { chain } = useAccount();
-  const { switchChain } = useSwitchChain();
 
   const usdValue = assetPrice ? parseFloat(coverageAmount || "0") * assetPrice.price : 0;
   
