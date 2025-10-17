@@ -2,6 +2,7 @@ import { useAccount, useReadContract, useWriteContract, useWaitForTransactionRec
 import { useState } from "react";
 import { CONTRACT_ADDRESSES, INSURANCE_POOL_ABI, RISK_ENGINE_ABI } from "./contracts";
 import type { Address } from "viem";
+import { usePublicClient } from "wagmi";
 
 export function useInsurancePool() {
   const { chain } = useAccount();
@@ -70,9 +71,11 @@ export function usePoolBalance() {
 export function usePurchaseCoverage() {
   const { address, abi } = useInsurancePool();
   const { chain } = useAccount();
+  const publicClient = usePublicClient();
   const { writeContractAsync, data: hash, isPending, error: writeError } = useWriteContract();
   const [isProcessing, setIsProcessing] = useState(false);
   const [manualSuccess, setManualSuccess] = useState(false);
+  const [policyId, setPolicyId] = useState<bigint | null>(null);
 
   // Disable waitForTransactionReceipt for Hedera (chain 296) due to RPC incompatibility
   const isHedera = chain?.id === 296;
@@ -116,9 +119,33 @@ export function usePurchaseCoverage() {
       if (chain?.id === 296) {
         console.log("🔷 Hedera transaction - marking success immediately");
         console.log("🔗 Verify on HashScan:", `https://hashscan.io/testnet/tx/${result}`);
-        setTimeout(() => {
+        
+        // Try to fetch policy ID from transaction receipt after a delay
+        setTimeout(async () => {
           setManualSuccess(true);
-        }, 2000); // Small delay for UX
+          
+          // Fetch transaction receipt to get policy ID from events
+          try {
+            const receipt = await publicClient?.getTransactionReceipt({ hash: result });
+            console.log("📄 Transaction receipt:", receipt);
+            
+            // Look for PolicyCreated event
+            if (receipt?.logs && receipt.logs.length > 0) {
+              for (const log of receipt.logs) {
+                // PolicyCreated event signature: PolicyCreated(uint256,address,uint256,uint256)
+                // First topic is event signature, second is policyId (indexed)
+                if (log.topics.length >= 2) {
+                  const extractedPolicyId = BigInt(log.topics[1]);
+                  console.log("🎫 Policy ID from event:", extractedPolicyId.toString());
+                  setPolicyId(extractedPolicyId);
+                  break;
+                }
+              }
+            }
+          } catch (error) {
+            console.warn("⚠️ Could not fetch policy ID from receipt:", error);
+          }
+        }, 3000); // Wait 3 seconds for tx to be processed
       }
       
       return result;
@@ -147,6 +174,7 @@ export function usePurchaseCoverage() {
     isPending: isPending || (isConfirming && !manualSuccess && !isHedera) || isProcessing,
     isSuccess: isSuccess || manualSuccess,
     hash,
+    policyId,
     error: writeError, // Only return write errors, ignore receipt errors for Hedera
   };
 }

@@ -66,8 +66,8 @@ export function TransactionStatus({
 
       {isTransactionSuccess && hash && (
         <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-          <div className="flex items-center gap-3">
-            <div className="flex-shrink-0">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 mt-0.5">
               <svg
                 className="h-5 w-5 text-green-600"
                 fill="none"
@@ -83,9 +83,17 @@ export function TransactionStatus({
               </svg>
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-green-800">{successMessage}</p>
-              <div className="mt-1 text-xs text-green-700">
-                <TransactionLink txHash={hash} showIcon={true} />
+              <p className="text-sm font-medium text-green-800 mb-2">{successMessage}</p>
+              <div className="space-y-1">
+                <div className="text-xs text-green-700">
+                  <strong>Transaction Hash:</strong>
+                </div>
+                <div className="text-xs">
+                  <TransactionLink txHash={hash} showIcon={true} />
+                </div>
+                <div className="text-xs text-green-600 mt-2">
+                  👆 Click to view on HashScan
+                </div>
               </div>
             </div>
           </div>

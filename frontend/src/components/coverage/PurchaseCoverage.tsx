@@ -52,7 +52,7 @@ export function PurchaseCoverage() {
     durationSeconds
   );
 
-  const { purchaseCoverage, isPending, isSuccess, hash, error: purchaseError } = usePurchaseCoverage();
+  const { purchaseCoverage, isPending, isSuccess, hash, policyId, error: purchaseError } = usePurchaseCoverage();
 
   const usdValue = assetPrice ? parseFloat(coverageAmount || "0") * assetPrice.price : 0;
   
@@ -295,6 +295,21 @@ export function PurchaseCoverage() {
         successMessage="Coverage purchased successfully! Your policy is now active."
         pendingMessage="Purchasing coverage..."
       />
+
+      {isSuccess && policyId && (
+        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="font-semibold text-blue-900 mb-2">📋 Policy Created!</div>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between items-center">
+              <span className="text-blue-700">Policy ID:</span>
+              <span className="font-mono font-bold text-blue-900">#{policyId.toString()}</span>
+            </div>
+            <div className="text-xs text-blue-600">
+              💡 Save this Policy ID to submit claims later
+            </div>
+          </div>
+        </div>
+      )}
 
       {purchaseError && (
         <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">
