@@ -43,10 +43,13 @@ export function useUserPolicies() {
         const currentBlock = await publicClient.getBlockNumber();
 
         // For Hedera, we can only query the last 7 days of logs
-        // Hedera produces ~1 block per second, so 7 days ≈ 604800 blocks
-        // Use a conservative 500k blocks to stay within limits
+        // The Hedera RPC has a 7-day (604800 seconds) limit on log queries
+        // To be safe, we'll query only the last 5 days worth of blocks
+        // Hedera blocks are produced approximately every 2-3 seconds
+        // 5 days = 432000 seconds, at ~2 seconds per block = ~216000 blocks
+        // Use 200k blocks to be conservative
         const isHedera = chain.id === 296; // Hedera testnet
-        const fromBlock = isHedera ? currentBlock - 500000n : "earliest";
+        const fromBlock = isHedera ? currentBlock - BigInt(200000) : ("earliest" as const);
 
         const policyCreatedLogs = (await publicClient.getLogs({
           address: contractAddress,
