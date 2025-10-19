@@ -366,5 +366,147 @@ export function useRiskScore(coverageAmount: bigint, duration: bigint, userAddre
   return { riskScore: riskScore as bigint | undefined, isLoading };
 }
 
+// Liquidity Pool Hooks
+export function useLiquidityProviderBalance(provider?: Address) {
+  const { address, abi } = useInsurancePool();
+  const { address: userAddress } = useAccount();
+  const targetAddress = provider || userAddress;
+
+  const {
+    data: balance,
+    isLoading,
+    refetch,
+  } = useReadContract({
+    address,
+    abi,
+    functionName: "getLiquidityProviderBalance",
+    args: targetAddress ? [targetAddress] : undefined,
+    query: {
+      enabled: !!address && !!targetAddress,
+      refetchInterval: 10000, // Refetch every 10 seconds
+    },
+  });
+
+  return { balance: balance as bigint | undefined, isLoading, refetch };
+}
+
+export function useAddLiquidity() {
+  const { address, abi } = useInsurancePool();
+  const { chain } = useAccount();
+  const publicClient = usePublicClient();
+  const { sendTransactionAsync, data: sendTxHash, isPending: isSendPending } = useSendTransaction();
+  const {
+    writeContractAsync,
+    data: writeHash,
+    isPending: isWritePending,
+    error: writeError,
+  } = useWriteContract();
+
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [manualSuccess, setManualSuccess] = useState(false);
+  const [manualError, setManualError] = useState<Error | null>(null);
+
+  const hash = sendTxHash || writeHash;
+  const isPending = isSendPending || isWritePending;
+  const isHedera = chain?.id === 296;
+
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+    hash,
+    query: {
+      enabled: !!hash && !isHedera && !manualSuccess,
+    },
+  });
+
+  const addLiquidity = async (amount: bigint) => {
+    if (!address) throw new Error("Contract address not found");
+    if (amount <= 0n) throw new Error("Amount must be greater than 0");
+
+    setIsProcessing(true);
+    setManualSuccess(false);
+    setManualError(null);
+
+    try {
+      let result: string;
+
+      if (isHedera) {
+        const data = encodeFunctionData({
+          abi,
+          functionName: "addLiquidity",
+          args: [],
+        });
+
+        result = await sendTransactionAsync({
+          to: address,
+          data,
+          value: amount,
+          gas: 500000n,
+        });
+
+        setTimeout(async () => {
+          try {
+            const receipt = await publicClient?.getTransactionReceipt({ hash: result });
+            if (receipt?.status === "success" || receipt?.status === 1) {
+              setManualSuccess(true);
+            }
+          } catch (error) {
+            console.error("Error checking receipt:", error);
+          }
+        }, 5000);
+      } else {
+        result = await writeContractAsync({
+          address,
+          abi,
+          functionName: "addLiquidity",
+          value: amount,
+        });
+      }
+
+      return result;
+    } catch (error) {
+      setManualError(error as Error);
+      throw error;
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return {
+    addLiquidity,
+    isPending: isPending || isConfirming || isProcessing,
+    isSuccess: isSuccess || manualSuccess,
+    hash,
+    error: writeError || manualError,
+  };
+}
+
+export function useWithdrawLiquidity() {
+  const { address, abi } = useInsurancePool();
+  const { writeContractAsync, data: hash, isPending, error } = useWriteContract();
+
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+    hash,
+  });
+
+  const withdrawLiquidity = async (amount: bigint) => {
+    if (!address) throw new Error("Contract address not found");
+    if (amount <= 0n) throw new Error("Amount must be greater than 0");
+
+    return await writeContractAsync({
+      address,
+      abi,
+      functionName: "withdrawLiquidity",
+      args: [amount],
+    });
+  };
+
+  return {
+    withdrawLiquidity,
+    isPending: isPending || isConfirming,
+    isSuccess,
+    hash,
+    error,
+  };
+}
+
 export * from "./hooks/useCCIP";
 export * from "./hooks/useUserPolicies";

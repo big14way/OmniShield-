@@ -2,23 +2,82 @@
 
 import { useState } from "react";
 import { useAccount } from "wagmi";
-import { formatEther } from "viem";
-import { usePoolBalance } from "@/lib/web3/hooks";
+import { formatEther, parseEther } from "viem";
+import {
+  usePoolBalance,
+  useLiquidityProviderBalance,
+  useAddLiquidity,
+  useWithdrawLiquidity,
+} from "@/lib/web3/hooks";
 import { formatCurrency, formatPercent } from "@/lib/utils";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 export function LiquidityPool() {
-  const { isConnected } = useAccount();
+  const { isConnected, chain } = useAccount();
   const { balance: poolBalance } = usePoolBalance();
+  const { balance: userLiquidityBalance, refetch: refetchBalance } = useLiquidityProviderBalance();
+  const {
+    addLiquidity,
+    isPending: isAdding,
+    isSuccess: addSuccess,
+    hash: addHash,
+  } = useAddLiquidity();
+  const {
+    withdrawLiquidity,
+    isPending: isWithdrawing,
+    isSuccess: withdrawSuccess,
+    hash: withdrawHash,
+  } = useWithdrawLiquidity();
+
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
   const [addAmount, setAddAmount] = useState("");
+  const [withdrawAmount, setWithdrawAmount] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   const stats = {
     tvl: poolBalance ? parseFloat(formatEther(poolBalance)) : 0,
     apy: 12.5,
     utilization: 65.3,
-    yourPosition: 0,
-    yourShare: 0,
+    yourPosition: userLiquidityBalance ? parseFloat(formatEther(userLiquidityBalance)) : 0,
+    yourShare:
+      poolBalance && userLiquidityBalance && poolBalance > 0n
+        ? (parseFloat(formatEther(userLiquidityBalance)) / parseFloat(formatEther(poolBalance))) *
+          100
+        : 0,
   };
+
+  const handleAddLiquidity = async () => {
+    try {
+      setError(null);
+      const amount = parseEther(addAmount);
+      await addLiquidity(amount);
+      setAddAmount("");
+      setIsAddModalOpen(false);
+      // Refetch balance after successful add
+      setTimeout(() => refetchBalance(), 5000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to add liquidity");
+      console.error("Add liquidity error:", err);
+    }
+  };
+
+  const handleWithdrawLiquidity = async () => {
+    try {
+      setError(null);
+      const amount = parseEther(withdrawAmount);
+      await withdrawLiquidity(amount);
+      setWithdrawAmount("");
+      setIsWithdrawModalOpen(false);
+      // Refetch balance after successful withdrawal
+      setTimeout(() => refetchBalance(), 5000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to withdraw liquidity");
+      console.error("Withdraw liquidity error:", err);
+    }
+  };
+
+  const isHedera = chain?.id === 296;
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto p-6">
@@ -32,7 +91,9 @@ export function LiquidityPool() {
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-6 rounded-xl shadow-lg">
           <div className="text-sm opacity-90 mb-1">Total Value Locked</div>
           <div className="text-3xl font-bold">{formatCurrency(stats.tvl)}</div>
-          <div className="text-sm opacity-75 mt-2">↑ 5.2% this week</div>
+          <div className="text-sm opacity-75 mt-2">
+            {poolBalance ? `${formatEther(poolBalance)} ${isHedera ? "HBAR" : "ETH"}` : "0"}
+          </div>
         </div>
 
         <div className="bg-gradient-to-br from-green-500 to-green-600 text-white p-6 rounded-xl shadow-lg">
@@ -50,6 +111,17 @@ export function LiquidityPool() {
         </div>
       </div>
 
+      {/* Connection Prompt */}
+      {!isConnected && (
+        <div className="bg-blue-50 border-2 border-blue-200 p-8 rounded-xl text-center">
+          <h3 className="text-xl font-semibold mb-4">Connect Your Wallet</h3>
+          <p className="text-gray-600 mb-6">
+            Connect your wallet to provide liquidity and start earning
+          </p>
+          <ConnectButton />
+        </div>
+      )}
+
       {/* Your Position */}
       {isConnected && (
         <div className="bg-white p-6 rounded-xl shadow-lg border-2 border-blue-100">
@@ -58,6 +130,10 @@ export function LiquidityPool() {
             <div>
               <div className="text-sm text-gray-600 mb-1">Liquidity Provided</div>
               <div className="text-2xl font-bold">{formatCurrency(stats.yourPosition)}</div>
+              <div className="text-xs text-gray-500 mt-1">
+                {userLiquidityBalance ? formatEther(userLiquidityBalance) : "0"}{" "}
+                {isHedera ? "HBAR" : "ETH"}
+              </div>
             </div>
             <div>
               <div className="text-sm text-gray-600 mb-1">Pool Share</div>
@@ -76,15 +152,52 @@ export function LiquidityPool() {
             </div>
           </div>
 
+          {error && (
+            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+              {error}
+            </div>
+          )}
+
+          {(addSuccess || withdrawSuccess) && (
+            <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg text-green-600 text-sm">
+              Transaction submitted!{" "}
+              {isHedera && addHash && (
+                <a
+                  href={`https://hashscan.io/testnet/transaction/${addHash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline ml-2"
+                >
+                  View on HashScan
+                </a>
+              )}
+              {isHedera && withdrawHash && (
+                <a
+                  href={`https://hashscan.io/testnet/transaction/${withdrawHash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline ml-2"
+                >
+                  View on HashScan
+                </a>
+              )}
+            </div>
+          )}
+
           <div className="flex gap-3 mt-6">
             <button
               onClick={() => setIsAddModalOpen(true)}
-              className="flex-1 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+              disabled={isAdding}
+              className="flex-1 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
             >
-              Add Liquidity
+              {isAdding ? "Adding..." : "Add Liquidity"}
             </button>
-            <button className="flex-1 py-3 bg-white border-2 border-gray-300 font-semibold rounded-lg hover:bg-gray-50 transition-colors">
-              Withdraw
+            <button
+              onClick={() => setIsWithdrawModalOpen(true)}
+              disabled={isWithdrawing || !userLiquidityBalance || userLiquidityBalance === 0n}
+              className="flex-1 py-3 bg-white border-2 border-gray-300 font-semibold rounded-lg hover:bg-gray-50 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
+            >
+              {isWithdrawing ? "Withdrawing..." : "Withdraw"}
             </button>
           </div>
         </div>
@@ -99,7 +212,7 @@ export function LiquidityPool() {
               1
             </div>
             <div>
-              <div className="font-medium">Deposit ETH or USDC</div>
+              <div className="font-medium">Deposit {isHedera ? "HBAR" : "ETH or USDC"}</div>
               <div className="text-sm text-gray-600">
                 Your funds are used to underwrite insurance coverage
               </div>
@@ -148,12 +261,15 @@ export function LiquidityPool() {
             <h3 className="text-xl font-bold mb-4">Add Liquidity</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Amount (ETH)</label>
+                <label className="block text-sm font-medium mb-2">
+                  Amount ({isHedera ? "HBAR" : "ETH"})
+                </label>
                 <input
                   type="number"
                   value={addAmount}
                   onChange={(e) => setAddAmount(e.target.value)}
                   placeholder="0.0"
+                  step="0.01"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
@@ -171,16 +287,67 @@ export function LiquidityPool() {
               </div>
               <div className="flex gap-3">
                 <button
-                  onClick={() => setIsAddModalOpen(false)}
+                  onClick={() => {
+                    setIsAddModalOpen(false);
+                    setError(null);
+                  }}
                   className="flex-1 py-3 bg-gray-200 font-semibold rounded-lg hover:bg-gray-300 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
-                  disabled={!addAmount || parseFloat(addAmount) <= 0}
+                  onClick={handleAddLiquidity}
+                  disabled={!addAmount || parseFloat(addAmount) <= 0 || isAdding}
                   className="flex-1 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
                 >
-                  Add Liquidity
+                  {isAdding ? "Adding..." : "Add Liquidity"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Withdraw Liquidity Modal */}
+      {isWithdrawModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full">
+            <h3 className="text-xl font-bold mb-4">Withdraw Liquidity</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Amount ({isHedera ? "HBAR" : "ETH"})
+                </label>
+                <input
+                  type="number"
+                  value={withdrawAmount}
+                  onChange={(e) => setWithdrawAmount(e.target.value)}
+                  placeholder="0.0"
+                  step="0.01"
+                  max={userLiquidityBalance ? formatEther(userLiquidityBalance) : "0"}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <div className="text-xs text-gray-500 mt-1">
+                  Available: {userLiquidityBalance ? formatEther(userLiquidityBalance) : "0"}{" "}
+                  {isHedera ? "HBAR" : "ETH"}
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setIsWithdrawModalOpen(false);
+                    setError(null);
+                  }}
+                  className="flex-1 py-3 bg-gray-200 font-semibold rounded-lg hover:bg-gray-300 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleWithdrawLiquidity}
+                  disabled={!withdrawAmount || parseFloat(withdrawAmount) <= 0 || isWithdrawing}
+                  className="flex-1 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                >
+                  {isWithdrawing ? "Withdrawing..." : "Withdraw"}
                 </button>
               </div>
             </div>

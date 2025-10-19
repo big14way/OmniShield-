@@ -87,6 +87,27 @@ export const INSURANCE_POOL_ABI = [
     type: "function",
   },
   {
+    inputs: [],
+    name: "addLiquidity",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [{ name: "amount", type: "uint256" }],
+    name: "withdrawLiquidity",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [{ name: "provider", type: "address" }],
+    name: "getLiquidityProviderBalance",
+    outputs: [{ name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     anonymous: false,
     inputs: [
       { indexed: true, name: "policyId", type: "uint256" },
@@ -95,6 +116,24 @@ export const INSURANCE_POOL_ABI = [
       { indexed: false, name: "premium", type: "uint256" },
     ],
     name: "PolicyCreated",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: true, name: "provider", type: "address" },
+      { indexed: false, name: "amount", type: "uint256" },
+    ],
+    name: "LiquidityAdded",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: true, name: "provider", type: "address" },
+      { indexed: false, name: "amount", type: "uint256" },
+    ],
+    name: "LiquidityWithdrawn",
     type: "event",
   },
   {
