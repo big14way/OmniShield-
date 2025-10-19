@@ -42,9 +42,19 @@ export function LiquidityPool() {
 
   // Refetch balance when transactions succeed
   useEffect(() => {
-    if (addSuccess) {
-      console.log("✅ Add liquidity successful, refetching balance...");
-      // Refetch multiple times to ensure we get the updated balance
+    if (addSuccess && addHash) {
+      console.log("✅ Add liquidity successful!", addHash);
+      setSuccessMessage(`Successfully added ${addAmount} HBAR to liquidity pool!`);
+      setLastTxHash(addHash);
+      setError(null);
+      
+      // Close modal after short delay
+      setTimeout(() => {
+        setIsAddModalOpen(false);
+        setAddAmount("");
+      }, 1500);
+      
+      // Refetch balance multiple times
       const refetchInterval = setInterval(() => {
         refetchBalance();
       }, 2000);
@@ -52,14 +62,27 @@ export function LiquidityPool() {
       // Clear after 10 seconds
       setTimeout(() => clearInterval(refetchInterval), 10000);
 
+      // Clear success message after 10 seconds
+      setTimeout(() => setSuccessMessage(null), 10000);
+
       return () => clearInterval(refetchInterval);
     }
-  }, [addSuccess, refetchBalance]);
+  }, [addSuccess, addHash, addAmount, refetchBalance]);
 
   useEffect(() => {
-    if (withdrawSuccess) {
-      console.log("✅ Withdraw liquidity successful, refetching balance...");
-      // Refetch multiple times to ensure we get the updated balance
+    if (withdrawSuccess && withdrawHash) {
+      console.log("✅ Withdraw liquidity successful!", withdrawHash);
+      setSuccessMessage(`Successfully withdrew ${withdrawAmount} HBAR from liquidity pool!`);
+      setLastTxHash(withdrawHash);
+      setError(null);
+      
+      // Close modal after short delay
+      setTimeout(() => {
+        setIsWithdrawModalOpen(false);
+        setWithdrawAmount("");
+      }, 1500);
+      
+      // Refetch balance multiple times
       const refetchInterval = setInterval(() => {
         refetchBalance();
       }, 2000);
@@ -67,15 +90,20 @@ export function LiquidityPool() {
       // Clear after 10 seconds
       setTimeout(() => clearInterval(refetchInterval), 10000);
 
+      // Clear success message after 10 seconds
+      setTimeout(() => setSuccessMessage(null), 10000);
+
       return () => clearInterval(refetchInterval);
     }
-  }, [withdrawSuccess, refetchBalance]);
+  }, [withdrawSuccess, withdrawHash, withdrawAmount, refetchBalance]);
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
   const [addAmount, setAddAmount] = useState("");
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [lastTxHash, setLastTxHash] = useState<string | null>(null);
 
   const stats = {
     tvl: poolBalance ? parseFloat(formatEther(poolBalance)) : 0,
@@ -92,6 +120,7 @@ export function LiquidityPool() {
   const handleAddLiquidity = async () => {
     try {
       setError(null);
+      setSuccessMessage(null);
       console.log("🚀 Starting add liquidity process...", {
         isConnected,
         chainId: chain?.id,
@@ -99,27 +128,32 @@ export function LiquidityPool() {
         amount: addAmount,
       });
       const amount = parseEther(addAmount);
+      console.log("💧 Calling addLiquidity with", amount.toString(), "wei");
       await addLiquidity(amount);
-      setAddAmount("");
-      setIsAddModalOpen(false);
-      // Balance will be refetched automatically by useEffect when addSuccess becomes true
+      console.log("✅ Transaction submitted, waiting for confirmation...");
+      // Don't close modal yet - let useEffect close it after success
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to add liquidity");
-      console.error("Add liquidity error:", err);
+      const errorMsg = err instanceof Error ? err.message : "Failed to add liquidity";
+      setError(errorMsg);
+      console.error("❌ Add liquidity error:", err);
+      // Keep modal open to show error
     }
   };
 
   const handleWithdrawLiquidity = async () => {
     try {
       setError(null);
+      setSuccessMessage(null);
       const amount = parseEther(withdrawAmount);
+      console.log("💸 Calling withdrawLiquidity with", amount.toString(), "wei");
       await withdrawLiquidity(amount);
-      setWithdrawAmount("");
-      setIsWithdrawModalOpen(false);
-      // Balance will be refetched automatically by useEffect when withdrawSuccess becomes true
+      console.log("✅ Transaction submitted, waiting for confirmation...");
+      // Don't close modal yet - let useEffect close it after success
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to withdraw liquidity");
-      console.error("Withdraw liquidity error:", err);
+      const errorMsg = err instanceof Error ? err.message : "Failed to withdraw liquidity";
+      setError(errorMsg);
+      console.error("❌ Withdraw liquidity error:", err);
+      // Keep modal open to show error
     }
   };
 
@@ -208,8 +242,38 @@ export function LiquidityPool() {
         </div>
       )}
 
+      {/* Contract Update Notice */}
+      {isConnected && chain?.id === 296 && userLiquidityBalance === undefined && (
+        <div className="bg-yellow-50 border-2 border-yellow-400 p-6 rounded-xl">
+          <div className="flex items-start gap-4">
+            <span className="text-3xl">⚠️</span>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-yellow-900 mb-2">
+                Contract Update Required
+              </h3>
+              <p className="text-yellow-800 mb-3">
+                The liquidity pool functions are missing from the currently deployed contract.
+                The contract needs to be redeployed with the updated code that includes:
+              </p>
+              <ul className="list-disc list-inside text-yellow-800 text-sm space-y-1 mb-3">
+                <li><code className="bg-yellow-100 px-1 py-0.5 rounded">addLiquidity()</code></li>
+                <li><code className="bg-yellow-100 px-1 py-0.5 rounded">withdrawLiquidity()</code></li>
+                <li><code className="bg-yellow-100 px-1 py-0.5 rounded">getLiquidityProviderBalance()</code></li>
+              </ul>
+              <div className="bg-yellow-100 border border-yellow-300 rounded-lg p-3 text-sm">
+                <p className="font-semibold text-yellow-900 mb-1">📋 To Fix:</p>
+                <p className="text-yellow-800">
+                  Please see <code className="bg-white px-1 py-0.5 rounded font-mono text-xs">LIQUIDITY_FIX_INSTRUCTIONS.md</code> 
+                  {" "}for deployment steps, or contact the development team.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Your Position */}
-      {isConnected && chain?.id === 296 && (
+      {isConnected && chain?.id === 296 && userLiquidityBalance !== undefined && (
         <div className="bg-white p-6 rounded-xl shadow-lg border-2 border-blue-100">
           <h3 className="text-lg font-semibold mb-4">Your Position</h3>
           <div className="grid grid-cols-2 gap-6">
@@ -239,34 +303,52 @@ export function LiquidityPool() {
           </div>
 
           {error && (
-            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
-              {error}
+            <div className="mt-4 p-4 bg-red-50 border-2 border-red-300 rounded-lg">
+              <div className="flex items-start gap-3">
+                <span className="text-2xl">❌</span>
+                <div className="flex-1">
+                  <h4 className="font-semibold text-red-800 mb-1">Transaction Failed</h4>
+                  <p className="text-red-600 text-sm">{error}</p>
+                </div>
+              </div>
             </div>
           )}
 
-          {(addSuccess || withdrawSuccess) && (
-            <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg text-green-600 text-sm">
-              Transaction submitted!{" "}
-              {isHedera && addHash && (
-                <a
-                  href={`https://hashscan.io/testnet/transaction/${addHash}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline ml-2"
-                >
-                  View on HashScan
-                </a>
-              )}
-              {isHedera && withdrawHash && (
-                <a
-                  href={`https://hashscan.io/testnet/transaction/${withdrawHash}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline ml-2"
-                >
-                  View on HashScan
-                </a>
-              )}
+          {successMessage && (
+            <div className="mt-4 p-4 bg-green-50 border-2 border-green-300 rounded-lg">
+              <div className="flex items-start gap-3">
+                <span className="text-2xl">✅</span>
+                <div className="flex-1">
+                  <h4 className="font-semibold text-green-800 mb-1">Transaction Confirmed!</h4>
+                  <p className="text-green-700 text-sm mb-2">{successMessage}</p>
+                  {isHedera && lastTxHash && (
+                    <a
+                      href={`https://hashscan.io/testnet/transaction/${lastTxHash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 text-sm font-medium underline inline-flex items-center gap-1"
+                    >
+                      View on HashScan →
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {(isAdding || isWithdrawing) && (
+            <div className="mt-4 p-4 bg-blue-50 border-2 border-blue-300 rounded-lg">
+              <div className="flex items-center gap-3">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                <div className="flex-1">
+                  <h4 className="font-semibold text-blue-800 mb-1">
+                    {isAdding ? "Adding Liquidity..." : "Withdrawing..."}
+                  </h4>
+                  <p className="text-blue-700 text-sm">
+                    Please confirm the transaction in your wallet and wait for confirmation.
+                  </p>
+                </div>
+              </div>
             </div>
           )}
 
