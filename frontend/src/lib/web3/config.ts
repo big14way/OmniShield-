@@ -2,6 +2,13 @@ import { http } from "wagmi";
 import { mainnet, sepolia } from "wagmi/chains";
 import { defineChain } from "viem";
 import { getDefaultConfig } from "@rainbow-me/rainbowkit";
+import {
+  metaMaskWallet,
+  walletConnectWallet,
+  coinbaseWallet,
+  injectedWallet,
+  rainbowWallet,
+} from "@rainbow-me/rainbowkit/wallets";
 
 // Hedera Testnet configuration
 export const hederaTestnet = defineChain({
@@ -23,6 +30,16 @@ export const config = getDefaultConfig({
   appName: "OmniShield Insurance",
   projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "1eebe528ca0ce94a99ceaa2e915058d7",
   chains: [hederaTestnet, sepolia, mainnet],
+  wallets: [
+    {
+      groupName: "Popular",
+      wallets: [metaMaskWallet, rainbowWallet, coinbaseWallet, walletConnectWallet],
+    },
+    {
+      groupName: "Other",
+      wallets: [injectedWallet],
+    },
+  ],
   transports: {
     [mainnet.id]: http(),
     [sepolia.id]: http(),
