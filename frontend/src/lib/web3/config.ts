@@ -20,7 +20,7 @@ export const hederaTestnet = defineChain({
 });
 
 export const config = createConfig({
-  chains: [mainnet, sepolia, hederaTestnet],
+  chains: [hederaTestnet, sepolia, mainnet],
   connectors: [
     injected(),
     walletConnect({
@@ -32,6 +32,7 @@ export const config = createConfig({
     [sepolia.id]: http(),
     [hederaTestnet.id]: http("https://testnet.hashio.io/api"),
   },
+  ssr: true,
 });
 
 declare module "wagmi" {

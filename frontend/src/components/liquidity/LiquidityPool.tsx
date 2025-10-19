@@ -13,7 +13,18 @@ import { formatCurrency, formatPercent } from "@/lib/utils";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 export function LiquidityPool() {
-  const { isConnected, chain } = useAccount();
+  const { isConnected, chain, address: userAddress } = useAccount();
+  
+  // Debug logging
+  useEffect(() => {
+    console.log("🔗 Account State:", {
+      isConnected,
+      chainId: chain?.id,
+      chainName: chain?.name,
+      userAddress,
+    });
+  }, [isConnected, chain?.id, chain?.name, userAddress]);
+
   const { balance: poolBalance } = usePoolBalance();
   const { balance: userLiquidityBalance, refetch: refetchBalance } = useLiquidityProviderBalance();
   const {
