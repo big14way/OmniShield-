@@ -25,15 +25,21 @@ export class PythPriceService {
     const priceIds: string[] = [];
     const symbolToPriceId: Record<string, string> = {};
 
+    console.log("Fetching prices for symbols:", symbols);
+
     for (const symbol of symbols) {
       const priceId = PythPriceFeeds.getPriceFeedId(symbol);
+      console.log(`Symbol: ${symbol}, Price ID: ${priceId}`);
       if (priceId) {
         priceIds.push(priceId);
         symbolToPriceId[symbol] = priceId;
       }
     }
 
+    console.log("Price IDs to fetch:", priceIds);
+
     if (priceIds.length === 0) {
+      console.warn("No valid price IDs found!");
       return {};
     }
 
