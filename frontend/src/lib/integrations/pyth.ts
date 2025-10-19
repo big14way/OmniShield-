@@ -85,12 +85,19 @@ export class PythPriceService {
 
       const response = await globalThis.fetch(url);
 
+      console.log("Response status:", response.status, response.statusText);
+
       if (!response.ok) {
+        const errorText = await response.text();
         console.error(`Pyth API error: ${response.status} ${response.statusText}`);
+        console.error("Error response body:", errorText);
         throw new Error(`Pyth API error: ${response.statusText}`);
       }
 
-      const data = await response.json();
+      const responseText = await response.text();
+      console.log("Raw response:", responseText);
+
+      const data = JSON.parse(responseText);
       console.log("Pyth API response:", data);
       const result: Record<string, PythPrice> = {};
 
