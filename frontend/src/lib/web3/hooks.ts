@@ -383,9 +383,11 @@ export function useLiquidityProviderBalance(provider?: Address) {
     args: targetAddress ? [targetAddress] : undefined,
     query: {
       enabled: !!address && !!targetAddress,
-      refetchInterval: 10000, // Refetch every 10 seconds
+      refetchInterval: 5000, // Refetch every 5 seconds for faster updates
     },
   });
+
+  console.log("💰 Liquidity balance for", targetAddress, ":", balance?.toString(), "wei");
 
   return { balance: balance as bigint | undefined, isLoading, refetch };
 }
@@ -421,6 +423,13 @@ export function useAddLiquidity() {
     if (!address) throw new Error("Contract address not found");
     if (amount <= 0n) throw new Error("Amount must be greater than 0");
 
+    console.log("💧 Adding liquidity:", {
+      amount: amount.toString(),
+      amountInEth: (Number(amount) / 1e18).toFixed(6),
+      contractAddress: address,
+      isHedera,
+    });
+
     setIsProcessing(true);
     setManualSuccess(false);
     setManualError(null);
@@ -435,6 +444,7 @@ export function useAddLiquidity() {
           args: [],
         });
 
+        console.log("📤 Sending Hedera transaction...");
         result = await sendTransactionAsync({
           to: address,
           data,
@@ -442,27 +452,62 @@ export function useAddLiquidity() {
           gas: 500000n,
         });
 
-        setTimeout(async () => {
-          try {
-            const receipt = await publicClient?.getTransactionReceipt({ hash: result });
-            if (receipt?.status === "success" || receipt?.status === 1) {
-              setManualSuccess(true);
+        console.log("✅ Transaction sent:", result);
+        console.log("🔗 View on HashScan:", `https://hashscan.io/testnet/transaction/${result}`);
+
+        // Check receipt multiple times with exponential backoff
+        const checkReceipt = async (attempt = 1, maxAttempts = 5) => {
+          const delay = 2000 * attempt; // 2s, 4s, 6s, 8s, 10s
+          console.log(`🔍 Checking receipt (attempt ${attempt}/${maxAttempts}) in ${delay}ms...`);
+
+          setTimeout(async () => {
+            try {
+              const receipt = await publicClient?.getTransactionReceipt({ hash: result });
+              console.log("📄 Receipt status:", receipt?.status);
+
+              if (
+                receipt?.status === "success" ||
+                receipt?.status === 1 ||
+                receipt?.status === "0x1"
+              ) {
+                console.log("✅ Liquidity added successfully!");
+                setManualSuccess(true);
+              } else if (
+                receipt?.status === "reverted" ||
+                receipt?.status === 0 ||
+                receipt?.status === "0x0"
+              ) {
+                console.error("❌ Transaction reverted on-chain");
+                setManualError(new Error("Transaction reverted on-chain"));
+              } else if (attempt < maxAttempts) {
+                checkReceipt(attempt + 1, maxAttempts);
+              }
+            } catch {
+              console.log("⏳ Receipt not ready yet, will retry...");
+              if (attempt < maxAttempts) {
+                checkReceipt(attempt + 1, maxAttempts);
+              } else {
+                console.warn("⚠️ Could not verify transaction. Check HashScan manually.");
+              }
             }
-          } catch (error) {
-            console.error("Error checking receipt:", error);
-          }
-        }, 5000);
+          }, delay);
+        };
+
+        checkReceipt(1, 5);
       } else {
+        console.log("📤 Sending EVM transaction...");
         result = await writeContractAsync({
           address,
           abi,
           functionName: "addLiquidity",
           value: amount,
         });
+        console.log("✅ Transaction sent:", result);
       }
 
       return result;
     } catch (error) {
+      console.error("❌ Add liquidity failed:", error);
       setManualError(error as Error);
       throw error;
     } finally {
@@ -481,30 +526,132 @@ export function useAddLiquidity() {
 
 export function useWithdrawLiquidity() {
   const { address, abi } = useInsurancePool();
-  const { writeContractAsync, data: hash, isPending, error } = useWriteContract();
+  const { chain } = useAccount();
+  const publicClient = usePublicClient();
+  const { sendTransactionAsync, data: sendTxHash, isPending: isSendPending } = useSendTransaction();
+  const {
+    writeContractAsync,
+    data: writeHash,
+    isPending: isWritePending,
+    error: writeError,
+  } = useWriteContract();
+
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [manualSuccess, setManualSuccess] = useState(false);
+  const [manualError, setManualError] = useState<Error | null>(null);
+
+  const hash = sendTxHash || writeHash;
+  const isPending = isSendPending || isWritePending;
+  const isHedera = chain?.id === 296;
 
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash,
+    query: {
+      enabled: !!hash && !isHedera && !manualSuccess,
+    },
   });
 
   const withdrawLiquidity = async (amount: bigint) => {
     if (!address) throw new Error("Contract address not found");
     if (amount <= 0n) throw new Error("Amount must be greater than 0");
 
-    return await writeContractAsync({
-      address,
-      abi,
-      functionName: "withdrawLiquidity",
-      args: [amount],
+    console.log("💸 Withdrawing liquidity:", {
+      amount: amount.toString(),
+      amountInEth: (Number(amount) / 1e18).toFixed(6),
+      contractAddress: address,
+      isHedera,
     });
+
+    setIsProcessing(true);
+    setManualSuccess(false);
+    setManualError(null);
+
+    try {
+      let result: string;
+
+      if (isHedera) {
+        const data = encodeFunctionData({
+          abi,
+          functionName: "withdrawLiquidity",
+          args: [amount],
+        });
+
+        console.log("📤 Sending Hedera withdrawal transaction...");
+        result = await sendTransactionAsync({
+          to: address,
+          data,
+          gas: 500000n,
+        });
+
+        console.log("✅ Transaction sent:", result);
+        console.log("🔗 View on HashScan:", `https://hashscan.io/testnet/transaction/${result}`);
+
+        // Check receipt multiple times with exponential backoff
+        const checkReceipt = async (attempt = 1, maxAttempts = 5) => {
+          const delay = 2000 * attempt;
+          console.log(`🔍 Checking receipt (attempt ${attempt}/${maxAttempts}) in ${delay}ms...`);
+
+          setTimeout(async () => {
+            try {
+              const receipt = await publicClient?.getTransactionReceipt({ hash: result });
+              console.log("📄 Receipt status:", receipt?.status);
+
+              if (
+                receipt?.status === "success" ||
+                receipt?.status === 1 ||
+                receipt?.status === "0x1"
+              ) {
+                console.log("✅ Liquidity withdrawn successfully!");
+                setManualSuccess(true);
+              } else if (
+                receipt?.status === "reverted" ||
+                receipt?.status === 0 ||
+                receipt?.status === "0x0"
+              ) {
+                console.error("❌ Transaction reverted on-chain");
+                setManualError(new Error("Transaction reverted on-chain"));
+              } else if (attempt < maxAttempts) {
+                checkReceipt(attempt + 1, maxAttempts);
+              }
+            } catch {
+              console.log("⏳ Receipt not ready yet, will retry...");
+              if (attempt < maxAttempts) {
+                checkReceipt(attempt + 1, maxAttempts);
+              } else {
+                console.warn("⚠️ Could not verify transaction. Check HashScan manually.");
+              }
+            }
+          }, delay);
+        };
+
+        checkReceipt(1, 5);
+      } else {
+        console.log("📤 Sending EVM withdrawal transaction...");
+        result = await writeContractAsync({
+          address,
+          abi,
+          functionName: "withdrawLiquidity",
+          args: [amount],
+        });
+        console.log("✅ Transaction sent:", result);
+      }
+
+      return result;
+    } catch (error) {
+      console.error("❌ Withdraw liquidity failed:", error);
+      setManualError(error as Error);
+      throw error;
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return {
     withdrawLiquidity,
-    isPending: isPending || isConfirming,
-    isSuccess,
+    isPending: isPending || isConfirming || isProcessing,
+    isSuccess: isSuccess || manualSuccess,
     hash,
-    error,
+    error: writeError || manualError,
   };
 }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAccount } from "wagmi";
 import { formatEther, parseEther } from "viem";
 import {
@@ -29,6 +29,37 @@ export function LiquidityPool() {
     hash: withdrawHash,
   } = useWithdrawLiquidity();
 
+  // Refetch balance when transactions succeed
+  useEffect(() => {
+    if (addSuccess) {
+      console.log("✅ Add liquidity successful, refetching balance...");
+      // Refetch multiple times to ensure we get the updated balance
+      const refetchInterval = setInterval(() => {
+        refetchBalance();
+      }, 2000);
+
+      // Clear after 10 seconds
+      setTimeout(() => clearInterval(refetchInterval), 10000);
+
+      return () => clearInterval(refetchInterval);
+    }
+  }, [addSuccess, refetchBalance]);
+
+  useEffect(() => {
+    if (withdrawSuccess) {
+      console.log("✅ Withdraw liquidity successful, refetching balance...");
+      // Refetch multiple times to ensure we get the updated balance
+      const refetchInterval = setInterval(() => {
+        refetchBalance();
+      }, 2000);
+
+      // Clear after 10 seconds
+      setTimeout(() => clearInterval(refetchInterval), 10000);
+
+      return () => clearInterval(refetchInterval);
+    }
+  }, [withdrawSuccess, refetchBalance]);
+
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
   const [addAmount, setAddAmount] = useState("");
@@ -54,8 +85,7 @@ export function LiquidityPool() {
       await addLiquidity(amount);
       setAddAmount("");
       setIsAddModalOpen(false);
-      // Refetch balance after successful add
-      setTimeout(() => refetchBalance(), 5000);
+      // Balance will be refetched automatically by useEffect when addSuccess becomes true
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to add liquidity");
       console.error("Add liquidity error:", err);
@@ -69,8 +99,7 @@ export function LiquidityPool() {
       await withdrawLiquidity(amount);
       setWithdrawAmount("");
       setIsWithdrawModalOpen(false);
-      // Refetch balance after successful withdrawal
-      setTimeout(() => refetchBalance(), 5000);
+      // Balance will be refetched automatically by useEffect when withdrawSuccess becomes true
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to withdraw liquidity");
       console.error("Withdraw liquidity error:", err);
