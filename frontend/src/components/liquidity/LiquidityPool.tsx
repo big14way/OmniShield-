@@ -15,16 +15,6 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 export function LiquidityPool() {
   const { isConnected, chain, address: userAddress } = useAccount();
   
-  // Debug logging
-  useEffect(() => {
-    console.log("🔗 Account State:", {
-      isConnected,
-      chainId: chain?.id,
-      chainName: chain?.name,
-      userAddress,
-    });
-  }, [isConnected, chain?.id, chain?.name, userAddress]);
-
   const { balance: poolBalance } = usePoolBalance();
   const { balance: userLiquidityBalance, refetch: refetchBalance } = useLiquidityProviderBalance();
   const {
@@ -39,6 +29,25 @@ export function LiquidityPool() {
     isSuccess: withdrawSuccess,
     hash: withdrawHash,
   } = useWithdrawLiquidity();
+
+  // State declarations MUST come before useEffect that use them
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
+  const [addAmount, setAddAmount] = useState("");
+  const [withdrawAmount, setWithdrawAmount] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [lastTxHash, setLastTxHash] = useState<string | null>(null);
+
+  // Debug logging
+  useEffect(() => {
+    console.log("🔗 Account State:", {
+      isConnected,
+      chainId: chain?.id,
+      chainName: chain?.name,
+      userAddress,
+    });
+  }, [isConnected, chain?.id, chain?.name, userAddress]);
 
   // Refetch balance when transactions succeed
   useEffect(() => {
@@ -96,14 +105,6 @@ export function LiquidityPool() {
       return () => clearInterval(refetchInterval);
     }
   }, [withdrawSuccess, withdrawHash, withdrawAmount, refetchBalance]);
-
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
-  const [addAmount, setAddAmount] = useState("");
-  const [withdrawAmount, setWithdrawAmount] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [lastTxHash, setLastTxHash] = useState<string | null>(null);
 
   const stats = {
     tvl: poolBalance ? parseFloat(formatEther(poolBalance)) : 0,
