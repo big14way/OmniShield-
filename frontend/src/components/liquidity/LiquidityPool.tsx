@@ -157,8 +157,48 @@ export function LiquidityPool() {
         </div>
       )}
 
+      {/* Wrong Network Warning */}
+      {isConnected && !chain?.id && (
+        <div className="bg-yellow-50 border-2 border-yellow-300 p-8 rounded-xl text-center">
+          <h3 className="text-xl font-semibold mb-4 text-yellow-800">⚠️ Network Not Detected</h3>
+          <p className="text-gray-700 mb-4">
+            Your wallet is connected but we cannot detect the network. Please ensure your wallet is
+            properly connected.
+          </p>
+          <p className="text-sm text-gray-600">
+            Try disconnecting and reconnecting your wallet.
+          </p>
+        </div>
+      )}
+
+      {/* Unsupported Network Warning */}
+      {isConnected && chain?.id && chain?.id !== 296 && (
+        <div className="bg-orange-50 border-2 border-orange-300 p-8 rounded-xl text-center">
+          <h3 className="text-xl font-semibold mb-4 text-orange-800">
+            ⚠️ Unsupported Network
+          </h3>
+          <p className="text-gray-700 mb-4">
+            You&apos;re connected to <strong>{chain?.name || "Unknown Network"}</strong> (Chain ID:{" "}
+            {chain?.id}), but this pool is only available on <strong>Hedera Testnet</strong>.
+          </p>
+          <p className="text-sm text-gray-600 mb-4">
+            Please switch to Hedera Testnet in your wallet to use the liquidity pool.
+          </p>
+          <div className="mt-4 p-4 bg-white rounded-lg text-left max-w-md mx-auto">
+            <p className="text-sm font-semibold mb-2">To add Hedera Testnet to MetaMask:</p>
+            <ul className="text-xs text-gray-600 space-y-1 list-disc list-inside">
+              <li>Network Name: Hedera Testnet</li>
+              <li>RPC URL: https://testnet.hashio.io/api</li>
+              <li>Chain ID: 296</li>
+              <li>Currency Symbol: HBAR</li>
+              <li>Block Explorer: https://hashscan.io/testnet</li>
+            </ul>
+          </div>
+        </div>
+      )}
+
       {/* Your Position */}
-      {isConnected && (
+      {isConnected && chain?.id === 296 && (
         <div className="bg-white p-6 rounded-xl shadow-lg border-2 border-blue-100">
           <h3 className="text-lg font-semibold mb-4">Your Position</h3>
           <div className="grid grid-cols-2 gap-6">
