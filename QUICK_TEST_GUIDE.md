@@ -12,6 +12,7 @@ npm run dev
 ```
 
 **Get Test HBAR:**
+
 - Faucet: https://portal.hedera.com/faucet
 - Request 5 HBAR to your wallet address
 
@@ -31,12 +32,14 @@ npm run dev
 5. Approve in wallet
 
 **✅ Verify:**
+
 - Transaction link appears → Click it
 - Opens HashScan → See transaction details
 - Look for `PolicyCreated` event
 - Copy **Policy ID** from event
 
 **HashScan Link:**
+
 ```
 https://hashscan.io/testnet/contract/0xA7c59f010700930003b33aB25a7a0679C860f29c
 ```
@@ -54,6 +57,7 @@ https://hashscan.io/testnet/contract/0xA7c59f010700930003b33aB25a7a0679C860f29c
    - ✅ Active status
 
 **✅ Verify On-Chain:**
+
 1. Open HashScan contract (link above)
 2. Go to "Read Contract" tab
 3. Call `getPolicy(YOUR_POLICY_ID)`
@@ -69,6 +73,7 @@ https://hashscan.io/testnet/contract/0xA7c59f010700930003b33aB25a7a0679C860f29c
 4. Approve transaction
 
 **✅ Verify:**
+
 - Transaction link appears
 - Click link → HashScan opens
 - See `PolicyClaimed` event with your amount
@@ -79,6 +84,7 @@ https://hashscan.io/testnet/contract/0xA7c59f010700930003b33aB25a7a0679C860f29c
 ## 🔍 Quick Verification Checklist
 
 ### Transaction Links Work
+
 ```
 - [ ] Every action shows transaction hash
 - [ ] Links open HashScan
@@ -86,6 +92,7 @@ https://hashscan.io/testnet/contract/0xA7c59f010700930003b33aB25a7a0679C860f29c
 ```
 
 ### Data is On-Chain
+
 ```
 - [ ] Policies fetched from blockchain events
 - [ ] Policy details match contract state
@@ -93,6 +100,7 @@ https://hashscan.io/testnet/contract/0xA7c59f010700930003b33aB25a7a0679C860f29c
 ```
 
 ### Prices are Live
+
 ```
 - [ ] Prices show on homepage
 - [ ] Open DevTools → Network tab
@@ -105,16 +113,19 @@ https://hashscan.io/testnet/contract/0xA7c59f010700930003b33aB25a7a0679C860f29c
 ## 📍 Important Addresses
 
 **InsurancePool (Main Contract):**
+
 ```
 0xA7c59f010700930003b33aB25a7a0679C860f29c
 ```
 
 **RiskEngine:**
+
 ```
 0x22753E4264FDDc6181dc7cce468904A80a363E44
 ```
 
 **HashScan Explorer:**
+
 ```
 https://hashscan.io/testnet
 ```
@@ -124,18 +135,21 @@ https://hashscan.io/testnet
 ## 🐛 Quick Troubleshooting
 
 **No policies showing?**
+
 ```bash
 # Wait 15 seconds, then refresh page
 # Check: Are you on Hedera Testnet (296)?
 ```
 
 **Transaction fails?**
+
 ```bash
 # Get more test HBAR from faucet
 # Try smaller coverage amount (e.g., 1 ETH)
 ```
 
 **Prices not loading?**
+
 ```bash
 # Check browser console (F12)
 # Network tab → Look for API errors
@@ -185,13 +199,13 @@ After 5 minutes of testing, you should have:
 
 ## 📊 What You're Testing
 
-| Feature | On-Chain Proof |
-|---------|----------------|
-| Purchase Coverage | `PolicyCreated` event on HashScan |
-| View Policies | Fetched from blockchain events |
-| Submit Claim | `PolicyClaimed` event on HashScan |
-| Pool Balance | `totalPoolBalance()` contract call |
-| Pyth Prices | API calls to Pyth Hermes |
+| Feature            | On-Chain Proof                     |
+| ------------------ | ---------------------------------- |
+| Purchase Coverage  | `PolicyCreated` event on HashScan  |
+| View Policies      | Fetched from blockchain events     |
+| Submit Claim       | `PolicyClaimed` event on HashScan  |
+| Pool Balance       | `totalPoolBalance()` contract call |
+| Pyth Prices        | API calls to Pyth Hermes           |
 | Transaction Status | Real tx hashes with HashScan links |
 
 ---
@@ -223,6 +237,7 @@ After 5 minutes of testing, you should have:
 ## 📞 Need Full Details?
 
 See `TESTING_ONCHAIN_FLOW.md` for:
+
 - Complete step-by-step guide
 - Advanced testing scenarios
 - Debugging tools

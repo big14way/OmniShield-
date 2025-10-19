@@ -3,6 +3,7 @@
 ## Issue: "Unknown Network" When Connected to Hedera
 
 If you see this in the debug panel:
+
 ```
 • Current Chain: Unknown (ID: N/A)
 • Valid Chain (Hedera 296): ❌
@@ -48,6 +49,7 @@ Block Explorer URL: https://hashscan.io/testnet
 After adding, verify these details in MetaMask:
 
 ### Check Network Details
+
 1. Click network dropdown
 2. Find "Hedera Testnet"
 3. Click ⋮ (three dots) → "Edit"
@@ -56,10 +58,12 @@ After adding, verify these details in MetaMask:
    - RPC URL: **https://testnet.hashio.io/api**
 
 ### Test Connection
+
 1. Switch to Hedera Testnet
 2. Open OmniShield app
 3. Refresh page
 4. Check debug panel should now show:
+
 ```
 • Current Chain: Hedera Testnet (ID: 296)
 • Valid Chain (Hedera 296): ✅
@@ -70,29 +74,37 @@ After adding, verify these details in MetaMask:
 ## 🚨 Common Issues & Fixes
 
 ### Issue 1: Shows "Unknown (ID: N/A)"
+
 **Cause:** MetaMask doesn't recognize the network
 **Fix:**
+
 - Delete existing Hedera network from MetaMask
 - Re-add using Method 1 with EXACT details above
 - Make sure Chain ID is **296**
 
 ### Issue 2: Shows Wrong Chain ID
+
 **Cause:** Added wrong network or Chain ID mismatch
 **Fix:**
+
 - Hedera Mainnet is 295 ❌
 - Hedera Testnet is 296 ✅
 - Delete and re-add with correct Chain ID
 
 ### Issue 3: Can't Connect to RPC
+
 **Cause:** Wrong RPC URL
 **Fix:**
+
 - Use: `https://testnet.hashio.io/api` (Testnet)
 - NOT: `https://mainnet.hashio.io/api` (Mainnet)
 - NOT: `https://pool.arkhia.io` (Old/different endpoint)
 
 ### Issue 4: Network Added but Still Shows Unknown
+
 **Cause:** Browser cache or wagmi config issue
 **Fix:**
+
 1. Hard refresh browser (Ctrl+Shift+R / Cmd+Shift+R)
 2. Clear MetaMask cache:
    - Settings → Advanced → Clear activity tab data
@@ -106,6 +118,7 @@ After adding, verify these details in MetaMask:
 Once configured correctly:
 
 1. **Start Frontend:**
+
    ```bash
    cd frontend
    npm run dev
@@ -123,6 +136,7 @@ Once configured correctly:
    - Select "Hedera Testnet"
 
 5. **Verify Debug Panel:**
+
    ```
    ✅ Current Chain: Hedera Testnet (ID: 296)
    ✅ Valid Chain (Hedera 296): ✅
@@ -180,22 +194,26 @@ Before testing, ensure:
 ### Complete Reset:
 
 1. **Delete Network:**
+
    ```
    MetaMask → Networks → Hedera Testnet → Delete
    ```
 
 2. **Clear Cache:**
+
    ```
    Browser → Hard refresh (Ctrl+Shift+R)
    MetaMask → Settings → Advanced → Clear activity data
    ```
 
 3. **Re-add Network:**
+
    ```
    Use Method 1 or 2 above with EXACT configuration
    ```
 
 4. **Restart Everything:**
+
    ```bash
    # Stop frontend (Ctrl+C)
    # Restart
@@ -234,12 +252,14 @@ If after following all steps, it still shows "Unknown":
    - Share error messages
 
 2. **Verify RPC Working:**
+
    ```bash
    curl https://testnet.hashio.io/api \
      -X POST \
      -H "Content-Type: application/json" \
      -d '{"jsonrpc":"2.0","method":"eth_chainId","params":[],"id":1}'
    ```
+
    Should return: `{"jsonrpc":"2.0","id":1,"result":"0x128"}` (0x128 = 296)
 
 3. **Check MetaMask Connection:**
@@ -248,10 +268,11 @@ If after following all steps, it still shows "Unknown":
    - Check MetaMask → Connected sites
 
 4. **Environment Variables:**
+
    ```bash
    # Check .env.local exists
    cat frontend/.env.local
-   
+
    # Should have:
    NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=...
    ```

@@ -95,7 +95,8 @@ export function ClaimsCenter() {
       {/* Active Coverage Cards */}
       <div>
         <h3 className="text-lg font-semibold mb-4">
-          Active Coverage {isPoliciesLoading && <span className="text-sm text-gray-500">(Loading...)</span>}
+          Active Coverage{" "}
+          {isPoliciesLoading && <span className="text-sm text-gray-500">(Loading...)</span>}
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {activeCoverage.map((coverage) => (

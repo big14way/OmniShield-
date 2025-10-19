@@ -91,9 +91,7 @@ export function TransactionStatus({
                 <div className="text-xs">
                   <TransactionLink txHash={hash} showIcon={true} />
                 </div>
-                <div className="text-xs text-green-600 mt-2">
-                  👆 Click to view on HashScan
-                </div>
+                <div className="text-xs text-green-600 mt-2">👆 Click to view on HashScan</div>
               </div>
             </div>
           </div>

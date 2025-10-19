@@ -3,28 +3,34 @@
 ## Issues Fixed
 
 ### 1. ✅ Hydration Error (SSR Mismatch)
+
 **Problem:** Server rendered "Connect Wallet" but client rendered "Hedera" causing React hydration error.
 
 **Solution:**
+
 - Added `mounted` state to track when component hydrates on client
 - Show loading placeholder during SSR
 - Only render wallet-dependent UI after mounting
 - Prevents server/client mismatch
 
 **Code Changes:**
+
 - `frontend/src/components/layout/Header.tsx`
   - Added `useState` and `useEffect` for mount detection
   - Wrapped wallet UI in `{!mounted ? ... : ...}` conditional
 
 ### 2. ✅ Purchase Button Disabled Issue
+
 **Problem:** Purchase button stayed disabled even after filling in coverage details.
 
 **Root Causes:**
+
 1. Contract address validation issue (checking for zero address)
 2. No clear error messages when premium calculation fails
 3. No network validation warning
 
 **Solutions:**
+
 - Added `isValidAddress` check to prevent calling contract with zero address
 - Added `isValidChain` return value from `usePremiumCalculator`
 - Show clear warning if not on Hedera Testnet
@@ -32,10 +38,10 @@
 - Added helpful error messages for different failure scenarios
 
 **Code Changes:**
+
 - `frontend/src/lib/web3/hooks.ts`
   - Added address validation before contract calls
   - Return `isValidChain` flag
-  
 - `frontend/src/components/coverage/PurchaseCoverage.tsx`
   - Better button disabled logic with `canPurchase` variable
   - Show premium in button: "Purchase Coverage for 0.05 HBAR"
@@ -49,6 +55,7 @@
 ### Test Hydration Error Fix
 
 1. **Start frontend:**
+
    ```bash
    cd frontend
    npm run dev
@@ -70,11 +77,13 @@
 ### Test Purchase Button Fix
 
 #### Scenario 1: Wrong Network
+
 1. Connect wallet to **Ethereum Sepolia** or any non-Hedera network
 2. Go to Purchase Coverage page
 3. Fill in coverage details
 
 **Expected:**
+
 - Button shows: "Enter valid coverage amount"
 - Yellow warning appears: "⚠️ Please connect to Hedera Testnet (Chain ID: 296)"
 - Button is disabled
@@ -82,6 +91,7 @@
 **✅ Clear feedback about network issue**
 
 #### Scenario 2: Correct Network (Hedera)
+
 1. Switch wallet to **Hedera Testnet (Chain ID: 296)**
 2. Refresh page
 3. Fill in coverage details:
@@ -90,6 +100,7 @@
    - Duration: 30 days
 
 **Expected:**
+
 - Brief "Calculating Premium..." text
 - Button changes to: "Purchase Coverage for 0.05 HBAR" (or actual premium)
 - Button is **enabled** and clickable
@@ -98,6 +109,7 @@
 **✅ Button works and shows premium**
 
 #### Scenario 3: No Connection
+
 1. If wallet not connected
 2. Button shows: "Connect Wallet"
 3. Button is disabled
@@ -108,20 +120,21 @@
 
 ## Error Messages Guide
 
-| Situation | Message | Action |
-|-----------|---------|--------|
-| Not connected | "Connect Wallet" | Connect wallet |
-| Wrong network | "⚠️ Please connect to Hedera Testnet" | Switch to Chain ID 296 |
-| Calculating | "Calculating Premium..." | Wait a moment |
-| Invalid amount | "Enter valid coverage amount" | Enter positive number |
-| Ready to purchase | "Purchase Coverage for X HBAR" | Click to purchase |
-| Contract error | "❌ Contract error: Unable to calculate" | Check contract deployment |
+| Situation         | Message                                  | Action                    |
+| ----------------- | ---------------------------------------- | ------------------------- |
+| Not connected     | "Connect Wallet"                         | Connect wallet            |
+| Wrong network     | "⚠️ Please connect to Hedera Testnet"    | Switch to Chain ID 296    |
+| Calculating       | "Calculating Premium..."                 | Wait a moment             |
+| Invalid amount    | "Enter valid coverage amount"            | Enter positive number     |
+| Ready to purchase | "Purchase Coverage for X HBAR"           | Click to purchase         |
+| Contract error    | "❌ Contract error: Unable to calculate" | Check contract deployment |
 
 ---
 
 ## Technical Details
 
 ### Hydration Fix Pattern
+
 ```typescript
 const [mounted, setMounted] = useState(false);
 
@@ -141,15 +154,16 @@ return (
 ```
 
 ### Address Validation Pattern
+
 ```typescript
 const isValidAddress = address && address !== "0x0000000000000000000000000000000000000000";
 
 const { data } = useReadContract({
-  address: isValidAddress ? address : undefined,  // Don't call if invalid
+  address: isValidAddress ? address : undefined, // Don't call if invalid
   abi,
   functionName: "calculatePremium",
   query: {
-    enabled: !!isValidAddress && amount > 0n,  // Only enable if valid
+    enabled: !!isValidAddress && amount > 0n, // Only enable if valid
   },
 });
 ```
@@ -203,6 +217,7 @@ After fixes, verify:
 ## Next Steps for Testing
 
 1. **Quick Test (2 minutes):**
+
    ```bash
    cd frontend && npm run dev
    # Connect to Hedera Testnet
@@ -229,19 +244,22 @@ After fixes, verify:
 
 **Q: Button still disabled?**
 A: Check:
+
 1. Are you on Hedera Testnet? (Chain ID: 296)
 2. Did you enter a coverage amount?
 3. Is your wallet connected?
 4. Check console for errors
 
 **Q: Still seeing hydration error?**
-A: 
+A:
+
 1. Hard refresh (Ctrl+Shift+R / Cmd+Shift+R)
 2. Clear browser cache
 3. Check you have latest code from branch
 
 **Q: Premium shows 0 or blank?**
 A:
+
 1. Verify contract address in `contracts.ts`
 2. Check Hedera testnet connection
 3. Ensure InsurancePool contract is deployed

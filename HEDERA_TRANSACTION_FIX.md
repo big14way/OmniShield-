@@ -3,6 +3,7 @@
 ## Problem
 
 When purchasing coverage on Hedera Testnet, transactions would fail with this error:
+
 ```
 TypeError: code.data.substring is not a function
 at waitForTransactionReceipt
@@ -27,11 +28,13 @@ This prevented users from completing purchases even though the transaction was s
 ## Solution Implemented
 
 ### 1. **Detect Hedera Chain**
+
 ```typescript
 const isHedera = chain?.id === 296;
 ```
 
 ### 2. **Disable Receipt Waiting for Hedera**
+
 ```typescript
 const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
   hash,
@@ -42,6 +45,7 @@ const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
 ```
 
 ### 3. **Manual Success Flag for Hedera**
+
 ```typescript
 if (chain?.id === 296) {
   console.log("🔷 Hedera transaction - marking success immediately");
@@ -53,6 +57,7 @@ if (chain?.id === 296) {
 ```
 
 ### 4. **Return Transaction Hash as Proof**
+
 - On Hedera, the transaction hash itself is proof of submission
 - Users can verify on HashScan using the clickable link
 - No need to wait for receipt confirmation
@@ -62,6 +67,7 @@ if (chain?.id === 296) {
 ## How It Works Now
 
 ### User Flow:
+
 1. **User clicks "Purchase Coverage"**
 2. **Wallet prompts for signature** → User approves
 3. **Transaction is submitted** → Get transaction hash
@@ -78,6 +84,7 @@ if (chain?.id === 296) {
 7. **User can click link** to verify on HashScan
 
 ### Console Logging:
+
 - `🔵 Starting purchase` - Purchase initiated
 - `📝 Preparing transaction` - Building transaction
 - `✅ Transaction hash` - Transaction submitted
@@ -142,11 +149,13 @@ if (chain?.id === 296) {
 ## Testing the Fix
 
 ### Before Testing:
+
 1. Make sure you're on **Hedera Testnet (Chain ID: 296)**
 2. Have test HBAR in wallet (from faucet)
 3. Open browser DevTools console (F12)
 
 ### Test Steps:
+
 1. Go to `/coverage`
 2. Fill in coverage details
 3. Click "Purchase Coverage"
@@ -164,6 +173,7 @@ if (chain?.id === 296) {
 8. Verify transaction on HashScan
 
 ### Expected Results:
+
 - ✅ No substring errors
 - ✅ Transaction submits successfully
 - ✅ Console shows clear flow
@@ -176,21 +186,25 @@ if (chain?.id === 296) {
 ## Alternative Solutions Considered
 
 ### ❌ **Option 1: Fix Viem's Parser**
+
 - Would require forking and modifying viem
 - Complex and unmaintainable
 - Would break on viem updates
 
 ### ❌ **Option 2: Custom Receipt Fetching**
+
 - Could manually fetch receipt with custom parsing
 - Extra complexity
 - Hedera receipts are different anyway
 
 ### ❌ **Option 3: Ignore Errors Silently**
+
 - Would hide the error but still show as "pending" forever
 - Bad UX
 - User wouldn't know if transaction succeeded
 
 ### ✅ **Option 4: Chain-Specific Behavior** (CHOSEN)
+
 - Clean separation of concerns
 - Works for both Hedera and standard EVM chains
 - Transaction hash is proof enough on Hedera
@@ -203,6 +217,7 @@ if (chain?.id === 296) {
 When you click the transaction link, you'll see on HashScan:
 
 **Transaction Details:**
+
 - ✅ Status: Success
 - ✅ From: Your address
 - ✅ To: InsurancePool contract
@@ -210,6 +225,7 @@ When you click the transaction link, you'll see on HashScan:
 - ✅ Timestamp: When transaction was processed
 
 **Event Logs:**
+
 - ✅ `PolicyCreated` event
   - `policyId`: Your new policy ID
   - `holder`: Your address
@@ -241,18 +257,21 @@ const skipReceiptCheck = CHAINS_WITH_RECEIPT_ISSUES.includes(chain?.id || 0);
 ## Additional Notes
 
 ### Why 2 Second Delay?
+
 - Gives user time to see the pending state
 - Feels more "real" than instant success
 - Time for transaction to propagate in network
 - Can be adjusted based on preference
 
 ### Why Not Wait Longer?
+
 - Hedera is fast (3-5 second finality)
 - User can verify on HashScan immediately
 - Transaction hash means it's already submitted
 - No need to wait for multiple confirmations like Ethereum
 
 ### Production Considerations:
+
 - Consider adding a "View on HashScan" button
 - Maybe add a refresh button to check policy in UI
 - Could poll for policy ID from events
