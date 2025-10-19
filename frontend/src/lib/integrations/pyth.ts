@@ -67,15 +67,18 @@ export class PythPriceService {
   async fetchLatestPrices(priceIds: string[]): Promise<Record<string, PythPrice>> {
     try {
       const idsParam = priceIds.map((id) => `ids[]=${id}`).join("&");
-      const response = await globalThis.fetch(
-        `${PYTH_HERMES_API}/v2/updates/price/latest?${idsParam}`
-      );
+      const url = `${PYTH_HERMES_API}/v2/updates/price/latest?${idsParam}`;
+      console.log("Fetching Pyth prices from:", url);
+
+      const response = await globalThis.fetch(url);
 
       if (!response.ok) {
+        console.error(`Pyth API error: ${response.status} ${response.statusText}`);
         throw new Error(`Pyth API error: ${response.statusText}`);
       }
 
       const data = await response.json();
+      console.log("Pyth API response:", data);
       const result: Record<string, PythPrice> = {};
 
       if (data.parsed) {
@@ -92,8 +95,10 @@ export class PythPriceService {
         }
       }
 
+      console.log("Parsed prices:", result);
       return result;
-    } catch {
+    } catch (error) {
+      console.error("Error fetching Pyth prices, using fallback:", error);
       return this.getFallbackPrices(priceIds);
     }
   }
