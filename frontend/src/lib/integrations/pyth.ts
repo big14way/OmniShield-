@@ -72,8 +72,10 @@ export class PythPriceService {
 
   async fetchLatestPrices(priceIds: string[]): Promise<Record<string, PythPrice>> {
     try {
-      const idsParam = priceIds.map((id) => `ids[]=${id}`).join("&");
-      const url = `${PYTH_HERMES_API}/v2/updates/price/latest?${idsParam}`;
+      // Remove 0x prefix for API call
+      const cleanIds = priceIds.map((id) => id.replace("0x", ""));
+      const idsParam = cleanIds.map((id) => `ids[]=${id}`).join("&");
+      const url = `${PYTH_HERMES_API}/api/latest_price_feeds?${idsParam}`;
       console.log("Fetching Pyth prices from:", url);
 
       const response = await globalThis.fetch(url);
@@ -87,8 +89,9 @@ export class PythPriceService {
       console.log("Pyth API response:", data);
       const result: Record<string, PythPrice> = {};
 
-      if (data.parsed) {
-        for (const priceData of data.parsed) {
+      // data is an array of price feeds
+      if (Array.isArray(data)) {
+        for (const priceData of data) {
           const id = `0x${priceData.id}`;
           const priceInfo = priceData.price;
 
@@ -109,28 +112,10 @@ export class PythPriceService {
     }
   }
 
-  private async calculate24hChange(priceId: string, currentPrice: number): Promise<number> {
-    try {
-      const oneDayAgo = Math.floor(Date.now() / 1000) - 86400;
-      const response = await globalThis.fetch(
-        `${PYTH_HERMES_API}/v2/updates/price/${oneDayAgo}?ids[]=${priceId}`
-      );
-
-      if (!response.ok) {
-        return 0;
-      }
-
-      const data = await response.json();
-      if (data.parsed && data.parsed.length > 0) {
-        const priceInfo = data.parsed[0].price;
-        const oldPrice = parseFloat(priceInfo.price) * Math.pow(10, priceInfo.expo);
-        return ((currentPrice - oldPrice) / oldPrice) * 100;
-      }
-
-      return 0;
-    } catch {
-      return 0;
-    }
+  private async calculate24hChange(_priceId: string, _currentPrice: number): Promise<number> {
+    // TODO: Implement 24h change calculation using EMA price comparison or price history
+    // For now, return 0 as the historical price API endpoint needs to be implemented
+    return 0;
   }
 
   private getFallbackPrices(priceIds: string[]): Record<string, PythPrice> {
