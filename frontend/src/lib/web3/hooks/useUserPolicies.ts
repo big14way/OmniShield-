@@ -39,6 +39,15 @@ export function useUserPolicies() {
         if (!contractAddress || contractAddress === "0x0000000000000000000000000000000000000000")
           return;
 
+        // Get current block number
+        const currentBlock = await publicClient.getBlockNumber();
+
+        // For Hedera, we can only query the last 7 days of logs
+        // Hedera produces ~1 block per second, so 7 days ≈ 604800 blocks
+        // Use a conservative 500k blocks to stay within limits
+        const isHedera = chain.id === 296; // Hedera testnet
+        const fromBlock = isHedera ? currentBlock - 500000n : "earliest";
+
         const policyCreatedLogs = (await publicClient.getLogs({
           address: contractAddress,
           event: {
@@ -54,7 +63,7 @@ export function useUserPolicies() {
           args: {
             holder: address,
           },
-          fromBlock: "earliest",
+          fromBlock,
           toBlock: "latest",
         })) as Log[];
 
@@ -97,7 +106,7 @@ export function useUserPolicies() {
               { type: "uint256", name: "amount" },
             ],
           },
-          fromBlock: "earliest",
+          fromBlock,
           toBlock: "latest",
         })) as Log[];
 
