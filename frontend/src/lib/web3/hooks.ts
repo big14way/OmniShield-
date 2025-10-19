@@ -2,7 +2,7 @@ import { useAccount, useReadContract, useWriteContract, useWaitForTransactionRec
 import { useState } from "react";
 import { CONTRACT_ADDRESSES, INSURANCE_POOL_ABI, RISK_ENGINE_ABI } from "./contracts";
 import type { Address } from "viem";
-import { usePublicClient, useConfig } from "wagmi";
+import { usePublicClient } from "wagmi";
 import { encodeFunctionData } from "viem";
 
 export function useInsurancePool() {
