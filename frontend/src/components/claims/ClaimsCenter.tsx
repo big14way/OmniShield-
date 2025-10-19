@@ -17,7 +17,7 @@ interface Claim {
 
 export function ClaimsCenter() {
   const { isConnected } = useAccount();
-  const [selectedPolicyId, setSelectedPolicyId] = useState<bigint>(1n);
+  const [selectedPolicyId, setSelectedPolicyId] = useState<bigint>(BigInt(1));
   const [claimAmount, setClaimAmount] = useState("");
 
   const { policy } = usePolicy(selectedPolicyId);
@@ -151,7 +151,7 @@ export function ClaimsCenter() {
       </div>
 
       {/* Submit Claim Form */}
-      {selectedPolicyId > 0n && (
+      {selectedPolicyId > BigInt(0) && (
         <div className="bg-white border-2 border-blue-200 rounded-xl p-6">
           <h3 className="text-lg font-semibold mb-4">Submit New Claim</h3>
           <div className="space-y-4">
