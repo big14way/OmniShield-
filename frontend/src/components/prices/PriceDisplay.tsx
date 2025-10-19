@@ -4,7 +4,13 @@ import { useEffect, useState } from "react";
 import { pythPriceService } from "@/lib/integrations/pyth";
 import type { PythPriceResponse } from "@/lib/integrations/pyth";
 
-const SUPPORTED_ASSETS = ["ETH/USD", "BTC/USD", "HBAR/USD", "USDC/USD"];
+const SUPPORTED_ASSETS = ["ETH", "BTC", "HBAR", "USDC"];
+const ASSET_DISPLAY_NAMES: Record<string, string> = {
+  ETH: "ETH/USD",
+  BTC: "BTC/USD",
+  HBAR: "HBAR/USD",
+  USDC: "USDC/USD",
+};
 
 export function PriceDisplay() {
   const [prices, setPrices] = useState<Record<string, PythPriceResponse>>({});
@@ -16,6 +22,7 @@ export function PriceDisplay() {
       try {
         setIsLoading(true);
         const priceData = await pythPriceService.fetchPrices(SUPPORTED_ASSETS);
+        console.log("Fetched price data:", priceData);
         setPrices(priceData);
         setError(null);
       } catch (err) {
@@ -80,19 +87,20 @@ export function PriceDisplay() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {SUPPORTED_ASSETS.map((symbol) => {
-          const priceData = prices[symbol];
+        {SUPPORTED_ASSETS.map((asset) => {
+          const priceData = prices[asset];
           if (!priceData) return null;
 
+          const displayName = ASSET_DISPLAY_NAMES[asset];
           const isPositive = priceData.change24h >= 0;
 
           return (
             <div
-              key={symbol}
+              key={asset}
               className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-4 border border-gray-200"
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-gray-700">{symbol}</span>
+                <span className="text-sm font-medium text-gray-700">{displayName}</span>
                 <span
                   className={`text-xs font-semibold px-2 py-1 rounded ${
                     isPositive
@@ -105,7 +113,7 @@ export function PriceDisplay() {
               </div>
 
               <div className="text-2xl font-bold text-gray-900 mb-1">
-                {formatPrice(priceData.price, symbol)}
+                {formatPrice(priceData.price, displayName)}
               </div>
 
               <div className="flex items-center justify-between text-xs text-gray-500">
