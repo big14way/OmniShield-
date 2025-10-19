@@ -69,9 +69,26 @@ export function PurchaseCoverage() {
     try {
       console.log("🔵 Starting purchase...", {
         coverageAmount: coverageAmount,
+        coverageAmountWei: coverageAmountWei.toString(),
         duration: duration,
+        durationSeconds: durationSeconds.toString(),
         premium: formatEther(premium),
+        premiumWei: premium.toString(),
       });
+      
+      // Validate before sending
+      if (coverageAmountWei === 0n) {
+        alert("Coverage amount cannot be zero");
+        return;
+      }
+      if (durationSeconds === 0n) {
+        alert("Duration cannot be zero");
+        return;
+      }
+      if (premium === 0n) {
+        alert("Premium cannot be zero");
+        return;
+      }
       
       const txHash = await purchaseCoverage(coverageAmountWei, durationSeconds, premium);
       

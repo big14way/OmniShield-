@@ -122,8 +122,10 @@ export function usePurchaseCoverage() {
         console.log("🔗 Verify on HashScan:", `https://hashscan.io/testnet/tx/${result}`);
         
         // Fetch transaction receipt to check if it actually succeeded
-        setTimeout(async () => {
+        // Retry up to 3 times with increasing delays for Hedera processing
+        const checkReceipt = async (attempt = 1, maxAttempts = 3) => {
           try {
+            console.log(`🔍 Checking receipt (attempt ${attempt}/${maxAttempts})...`);
             const receipt = await publicClient?.getTransactionReceipt({ hash: result });
             console.log("📄 Transaction receipt:", receipt);
             
@@ -131,7 +133,8 @@ export function usePurchaseCoverage() {
             if (receipt?.status === 'reverted' || receipt?.status === 0 || receipt?.status === '0x0') {
               console.error("❌ Transaction reverted on-chain!");
               console.error("Receipt:", receipt);
-              setManualError(new Error("Transaction reverted: The contract rejected this transaction. Check if you sent enough premium or if parameters are valid."));
+              console.error("🔗 View on HashScan:", `https://hashscan.io/testnet/transaction/${result}`);
+              setManualError(new Error("Transaction reverted: The contract rejected this transaction. This might be due to insufficient premium, invalid parameters, or contract validation failure."));
               setManualSuccess(false);
               return;
             }
@@ -158,10 +161,26 @@ export function usePurchaseCoverage() {
               console.warn("⚠️ No events emitted - transaction may have failed silently");
             }
           } catch (error) {
+            // Receipt not found yet - retry if attempts remain
+            if (error instanceof Error && error.name === 'TransactionReceiptNotFoundError' && attempt < maxAttempts) {
+              console.log(`⏳ Receipt not ready yet, retrying in ${2 * attempt} seconds...`);
+              setTimeout(() => checkReceipt(attempt + 1, maxAttempts), 2000 * attempt);
+              return;
+            }
+            
+            // Final attempt failed or other error
             console.error("❌ Error fetching receipt:", error);
-            setManualError(error instanceof Error ? error : new Error("Failed to verify transaction"));
+            console.error("🔗 Check status on HashScan:", `https://hashscan.io/testnet/transaction/${result}`);
+            
+            // Don't set error - let user check HashScan manually
+            // The transaction might still be processing
+            setManualSuccess(false);
+            console.warn("⚠️ Could not verify transaction status. Please check HashScan to confirm.");
           }
-        }, 4000); // Wait 4 seconds for tx to be fully processed
+        };
+        
+        // Start checking after 5 seconds
+        setTimeout(() => checkReceipt(1, 3), 5000);
       }
       
       return result;
