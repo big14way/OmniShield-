@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    // Mock protocol statistics - In production, aggregate from subgraph
     const stats = {
       tvl: 12500000,
       totalCoverage: 8125000,

@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useAccount } from "wagmi";
+import { useAccount, useSwitchChain } from "wagmi";
 import { parseEther, formatEther } from "viem";
 import { usePremiumCalculator, usePurchaseCoverage } from "@/lib/web3/hooks";
 import { useAssetPrice } from "@/lib/hooks/usePrices";
 import { formatCurrency, formatDuration } from "@/lib/utils";
+import { TransactionStatus } from "@/components/common/TransactionStatus";
 
 const ASSETS = [
   { symbol: "ETH", name: "Ethereum", icon: "⟠" },
@@ -35,7 +36,8 @@ const COVERAGE_TYPES = [
 ];
 
 export function PurchaseCoverage() {
-  const { address, isConnected } = useAccount();
+  const { isConnected, chain } = useAccount();
+  const { switchChain } = useSwitchChain();
   const [selectedAsset, setSelectedAsset] = useState(ASSETS[0]);
   const [coverageAmount, setCoverageAmount] = useState("10");
   const [duration, setDuration] = useState(30); // days
@@ -45,22 +47,64 @@ export function PurchaseCoverage() {
   const coverageAmountWei = parseEther(coverageAmount || "0");
   const durationSeconds = BigInt(duration * 24 * 60 * 60);
 
-  const { premium, isLoading: isPremiumLoading } = usePremiumCalculator(
+  const { premium, isLoading: isPremiumLoading, isValidChain } = usePremiumCalculator(
     coverageAmountWei,
     durationSeconds
   );
 
-  const { purchaseCoverage, isPending, isSuccess } = usePurchaseCoverage();
+  const { purchaseCoverage, isPending, isSuccess, hash, policyId, error: purchaseError } = usePurchaseCoverage();
 
   const usdValue = assetPrice ? parseFloat(coverageAmount || "0") * assetPrice.price : 0;
+  
+  const hasValidAmount = coverageAmount && parseFloat(coverageAmount) > 0;
+  const canPurchase = isConnected && isValidChain && hasValidAmount && !isPending && !isPremiumLoading;
+
+  const handleSwitchToHedera = () => {
+    switchChain?.({ chainId: 296 });
+  };
 
   const handlePurchase = async () => {
     if (!premium || !isConnected) return;
 
     try {
-      await purchaseCoverage(coverageAmountWei, durationSeconds, premium);
+      console.log("🔵 Starting purchase...", {
+        coverageAmount: coverageAmount,
+        coverageAmountWei: coverageAmountWei.toString(),
+        duration: duration,
+        durationSeconds: durationSeconds.toString(),
+        premium: formatEther(premium),
+        premiumWei: premium.toString(),
+      });
+      
+      // Validate before sending
+      if (coverageAmountWei === 0n) {
+        alert("Coverage amount cannot be zero");
+        return;
+      }
+      if (durationSeconds === 0n) {
+        alert("Duration cannot be zero");
+        return;
+      }
+      if (!premium || premium === 0n) {
+        alert("Premium is not calculated yet. Please wait a moment and try again.");
+        return;
+      }
+      
+      console.log("✅ All validations passed, proceeding with purchase...");
+      console.log("🔍 Final check - Premium value:", {
+        premium,
+        premiumString: premium.toString(),
+        premiumType: typeof premium,
+        isZero: premium === 0n,
+      });
+      
+      const txHash = await purchaseCoverage(coverageAmountWei, durationSeconds, premium);
+      
+      console.log("✅ Transaction submitted:", txHash);
     } catch (error) {
-      console.error("Failed to purchase coverage:", error);
+      console.error("❌ Failed to purchase coverage:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      alert(`Transaction failed: ${errorMessage}`);
     }
   };
 
@@ -77,6 +121,28 @@ export function PurchaseCoverage() {
         <h2 className="text-2xl font-bold mb-2">Purchase Coverage</h2>
         <p className="text-gray-600">Protect your crypto assets with parametric insurance</p>
       </div>
+
+      {/* Network Warning - Show prominently if wrong network */}
+      {isConnected && !isValidChain && (
+        <div className="p-6 bg-red-50 border-2 border-red-300 rounded-xl">
+          <div className="flex items-start gap-4">
+            <div className="text-4xl">⚠️</div>
+            <div className="flex-1">
+              <h3 className="text-lg font-bold text-red-900 mb-2">Wrong Network!</h3>
+              <p className="text-red-800 mb-4">
+                You&apos;re currently on <strong>{chain?.name || 'Unknown Network'}</strong>. 
+                OmniShield contracts are deployed on <strong>Hedera Testnet</strong>.
+              </p>
+              <button
+                onClick={handleSwitchToHedera}
+                className="px-6 py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Switch to Hedera Testnet (Chain ID: 296)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Asset Selector */}
       <div>
@@ -206,24 +272,78 @@ export function PurchaseCoverage() {
         </div>
       </div>
 
+      {/* Debug Info */}
+      {isConnected && (
+        <div className="p-3 bg-gray-100 rounded-lg text-xs space-y-1">
+          <div><strong>Debug Info:</strong></div>
+          <div>• Connected: {isConnected ? '✅' : '❌'}</div>
+          <div>• Current Chain: {chain?.name || 'Unknown'} (ID: {chain?.id || 'N/A'})</div>
+          <div>• Valid Chain (Hedera 296): {isValidChain ? '✅' : '❌'}</div>
+          <div>• Coverage Amount: {coverageAmount || 'empty'}</div>
+          <div>• Coverage Wei: {coverageAmountWei?.toString() || 'null'}</div>
+          <div>• Duration: {duration} days ({durationSeconds.toString()} seconds)</div>
+          <div>• Premium Loading: {isPremiumLoading ? '⏳' : '✅'}</div>
+          <div>• Premium: {premium ? formatEther(premium) : 'null'} HBAR</div>
+          <div>• Premium Wei: {premium?.toString() || 'null'}</div>
+          <div>• Premium Type: {premium ? typeof premium : 'undefined'}</div>
+          <div>• Premium === 0n: {premium === 0n ? 'YES' : 'NO'}</div>
+          <div>• Can Purchase: {canPurchase ? '✅' : '❌'}</div>
+        </div>
+      )}
+
       {/* Transaction Button */}
       <button
-        onClick={handlePurchase}
-        disabled={!isConnected || !premium || isPending || isPremiumLoading}
+        onClick={isConnected && !isValidChain ? handleSwitchToHedera : handlePurchase}
+        disabled={!isConnected || (isValidChain && !canPurchase)}
         className="w-full py-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
       >
         {!isConnected
           ? "Connect Wallet"
+          : !isValidChain
+          ? "Switch to Hedera Testnet"
           : isPending
           ? "Processing..."
           : isPremiumLoading
           ? "Calculating Premium..."
+          : !hasValidAmount
+          ? "Enter coverage amount"
+          : premium && premium > 0n
+          ? `Purchase Coverage for ${formatEther(premium)} HBAR`
           : "Purchase Coverage"}
       </button>
 
-      {isSuccess && (
-        <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-800">
-          ✅ Coverage purchased successfully!
+      {isConnected && isValidChain && !isPremiumLoading && hasValidAmount && (!premium || premium === 0n) && (
+        <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">
+          ❌ Contract error: Unable to calculate premium. Please try again or contact support.
+        </div>
+      )}
+
+      <TransactionStatus
+        hash={hash}
+        isPending={isPending}
+        isSuccess={isSuccess}
+        successMessage="Coverage purchased successfully! Your policy is now active."
+        pendingMessage="Purchasing coverage..."
+      />
+
+      {isSuccess && policyId && (
+        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="font-semibold text-blue-900 mb-2">📋 Policy Created!</div>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between items-center">
+              <span className="text-blue-700">Policy ID:</span>
+              <span className="font-mono font-bold text-blue-900">#{policyId.toString()}</span>
+            </div>
+            <div className="text-xs text-blue-600">
+              💡 Save this Policy ID to submit claims later
+            </div>
+          </div>
+        </div>
+      )}
+
+      {purchaseError && (
+        <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">
+          ❌ Transaction failed: {purchaseError instanceof Error ? purchaseError.message : "Unknown error"}
         </div>
       )}
     </div>

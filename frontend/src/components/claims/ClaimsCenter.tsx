@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useAccount } from "wagmi";
 import { formatEther } from "viem";
-import { usePolicy, useSubmitClaim } from "@/lib/web3/hooks";
-import { formatCurrency, formatDuration } from "@/lib/utils";
+import { usePolicy, useSubmitClaim, useUserPolicies } from "@/lib/web3/hooks";
+import { TransactionStatus } from "@/components/common/TransactionStatus";
 
 interface Claim {
   id: number;
@@ -12,57 +12,40 @@ interface Claim {
   status: "pending" | "approved" | "rejected" | "paid";
   amount: string;
   date: string;
+  txHash?: string;
 }
 
 export function ClaimsCenter() {
   const { isConnected } = useAccount();
-  const [selectedPolicyId, setSelectedPolicyId] = useState<bigint>(1n);
+  const [selectedPolicyId, setSelectedPolicyId] = useState<bigint>(BigInt(1));
   const [claimAmount, setClaimAmount] = useState("");
 
-  const { policy, isLoading: isPolicyLoading } = usePolicy(selectedPolicyId);
-  const { submitClaim, isPending, isSuccess } = useSubmitClaim();
+  const { policy } = usePolicy(selectedPolicyId);
+  const { submitClaim, isPending, isSuccess, hash } = useSubmitClaim();
+  const { policies, claims: userClaims, isLoading: isPoliciesLoading } = useUserPolicies();
 
-  // Mock active coverage data - would come from subgraph in production
-  const activeCoverage = [
-    {
-      id: 1,
+  const activeCoverage = policies
+    .filter((p) => p.active)
+    .map((p) => ({
+      id: Number(p.id),
       asset: "ETH",
-      amount: "10",
-      type: "Price Protection",
-      startDate: "2025-01-01",
-      endDate: "2025-02-01",
-      premium: "0.05",
+      amount: formatEther(p.coverageAmount),
+      type: "Insurance Policy",
+      startDate: new Date(Number(p.startTime) * 1000).toLocaleDateString(),
+      endDate: new Date(Number(p.endTime) * 1000).toLocaleDateString(),
+      premium: formatEther(p.premium),
       status: "active" as const,
-    },
-    {
-      id: 2,
-      asset: "BTC",
-      amount: "0.5",
-      type: "Smart Contract",
-      startDate: "2025-01-10",
-      endDate: "2025-04-10",
-      premium: "0.02",
-      status: "active" as const,
-    },
-  ];
+      txHash: p.txHash,
+    }));
 
-  // Mock claims history
-  const claims: Claim[] = [
-    {
-      id: 1,
-      policyId: 1,
-      status: "approved",
-      amount: "5.0",
-      date: "2025-01-15",
-    },
-    {
-      id: 2,
-      policyId: 3,
-      status: "pending",
-      amount: "2.5",
-      date: "2025-01-14",
-    },
-  ];
+  const claims = userClaims.map((c) => ({
+    id: Number(c.id),
+    policyId: Number(c.policyId),
+    status: "pending" as const,
+    amount: formatEther(c.amount),
+    date: new Date(Number(c.timestamp) * 1000).toLocaleDateString(),
+    txHash: c.txHash,
+  }));
 
   const handleSubmitClaim = async () => {
     if (!claimAmount || !selectedPolicyId) return;
@@ -111,7 +94,10 @@ export function ClaimsCenter() {
 
       {/* Active Coverage Cards */}
       <div>
-        <h3 className="text-lg font-semibold mb-4">Active Coverage</h3>
+        <h3 className="text-lg font-semibold mb-4">
+          Active Coverage{" "}
+          {isPoliciesLoading && <span className="text-sm text-gray-500">(Loading...)</span>}
+        </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {activeCoverage.map((coverage) => (
             <div
@@ -157,7 +143,7 @@ export function ClaimsCenter() {
           <div className="bg-gray-50 rounded-xl p-12 text-center">
             <div className="text-6xl mb-4">📋</div>
             <h3 className="text-xl font-semibold mb-2">No Active Coverage</h3>
-            <p className="text-gray-600 mb-4">You don't have any active coverage policies</p>
+            <p className="text-gray-600 mb-4">You don&apos;t have any active coverage policies</p>
             <button className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors">
               Purchase Coverage
             </button>
@@ -166,7 +152,7 @@ export function ClaimsCenter() {
       </div>
 
       {/* Submit Claim Form */}
-      {selectedPolicyId > 0n && (
+      {selectedPolicyId > BigInt(0) && (
         <div className="bg-white border-2 border-blue-200 rounded-xl p-6">
           <h3 className="text-lg font-semibold mb-4">Submit New Claim</h3>
           <div className="space-y-4">
@@ -213,11 +199,13 @@ export function ClaimsCenter() {
               {isPending ? "Submitting..." : "Submit Claim"}
             </button>
 
-            {isSuccess && (
-              <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-800">
-                ✅ Claim submitted successfully!
-              </div>
-            )}
+            <TransactionStatus
+              hash={hash}
+              isPending={isPending}
+              isSuccess={isSuccess}
+              successMessage="Claim submitted successfully!"
+              pendingMessage="Submitting claim..."
+            />
           </div>
         </div>
       )}

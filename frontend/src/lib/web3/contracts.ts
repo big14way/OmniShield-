@@ -4,21 +4,27 @@ import { hederaTestnet } from "./config";
 export interface ContractAddresses {
   insurancePool: `0x${string}`;
   riskEngine: `0x${string}`;
-  pythPriceConsumer: `0x${string}`;
+  claimsProcessor: `0x${string}`;
+  hederaBridge: `0x${string}`;
+  pythPriceConsumer?: `0x${string}`;
   ccipBridge?: `0x${string}`;
 }
 
 export const CONTRACT_ADDRESSES: Record<number, ContractAddresses> = {
   [sepolia.id]: {
-    insurancePool: "0x0000000000000000000000000000000000000000", // TODO: Add deployed address
+    insurancePool: "0x0000000000000000000000000000000000000000",
     riskEngine: "0x0000000000000000000000000000000000000000",
+    claimsProcessor: "0x0000000000000000000000000000000000000000",
+    hederaBridge: "0x0000000000000000000000000000000000000000",
     pythPriceConsumer: "0x0000000000000000000000000000000000000000",
     ccipBridge: "0x0000000000000000000000000000000000000000",
   },
   [hederaTestnet.id]: {
-    insurancePool: "0xA7c59f010700930003b33aB25a7a0679C860f29c",
-    riskEngine: "0x22753E4264FDDc6181dc7cce468904A80a363E44",
-    pythPriceConsumer: "0x0000000000000000000000000000000000000000",
+    insurancePool: "0x525C7063E7C20997BaaE9bDa922159152D0e8417",
+    riskEngine: "0x5bf5b11053e734690269C6B9D438F8C9d48F528A",
+    claimsProcessor: "0x3aAde2dCD2Df6a8cAc689EE797591b2913658659",
+    hederaBridge: "0xab16A69A5a8c12C732e0DEFF4BE56A70bb64c926",
+    pythPriceConsumer: "0xA2aa501b19aff244D90cc15a4Cf739D2725B5729",
   },
 };
 

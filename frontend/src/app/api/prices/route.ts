@@ -1,12 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-
-// Mock Pyth price data - In production, fetch from Pyth Network
-const MOCK_PRICES: Record<string, { price: number; change24h: number; lastUpdate: number }> = {
-  ETH: { price: 3245.67, change24h: 2.34, lastUpdate: Date.now() },
-  BTC: { price: 68234.12, change24h: -1.23, lastUpdate: Date.now() },
-  HBAR: { price: 0.12, change24h: 5.67, lastUpdate: Date.now() },
-  USDC: { price: 1.0, change24h: 0.01, lastUpdate: Date.now() },
-};
+import { pythPriceService } from "@/lib/integrations/pyth";
 
 export async function GET(request: NextRequest) {
   try {
@@ -18,16 +11,7 @@ export async function GET(request: NextRequest) {
     }
 
     const symbols = symbolsParam.split(",").map((s) => s.trim().toUpperCase());
-    const prices: Record<string, any> = {};
-
-    for (const symbol of symbols) {
-      if (MOCK_PRICES[symbol]) {
-        prices[symbol] = {
-          symbol,
-          ...MOCK_PRICES[symbol],
-        };
-      }
-    }
+    const prices = await pythPriceService.fetchPrices(symbols);
 
     return NextResponse.json(prices, {
       headers: {

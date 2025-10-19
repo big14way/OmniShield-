@@ -8,23 +8,43 @@ interface RiskCalculationRequest {
   userAddress?: string;
 }
 
+function getAssetRiskMultiplier(asset: string): number {
+  const volatilityRatios: Record<string, number> = {
+    BTC: 1.0,
+    ETH: 1.2,
+    HBAR: 1.5,
+    USDC: 0.1,
+    USDT: 0.1,
+    DAI: 0.2,
+  };
+  return volatilityRatios[asset.toUpperCase()] || 1.0;
+}
+
+function getCoverageTypeMultiplier(coverageType: string): number {
+  const typeMultipliers: Record<string, number> = {
+    price_protection: 1.5,
+    smart_contract: 1.2,
+    bridge_protection: 1.3,
+    stablecoin_depeg: 1.4,
+  };
+  return typeMultipliers[coverageType] || 1.0;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body: RiskCalculationRequest = await request.json();
-    const { coverageAmount, duration, asset, coverageType, userAddress } = body;
+    const { coverageAmount, duration, asset, coverageType } = body;
 
     // Basic validation
     if (!coverageAmount || !duration || !asset || !coverageType) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // Mock risk calculation - In production, use on-chain RiskEngine
-    const baseRate = 0.05; // 5% base
+    const baseRate = 0.05;
     const durationMultiplier = 1 + duration / 365;
-    const assetMultiplier =
-      asset === "BTC" ? 1.0 : asset === "ETH" ? 1.2 : asset === "HBAR" ? 1.5 : 1.0;
-    const typeMultiplier =
-      coverageType === "price_protection" ? 1.5 : coverageType === "smart_contract" ? 1.2 : 1.3;
+
+    const assetMultiplier = getAssetRiskMultiplier(asset);
+    const typeMultiplier = getCoverageTypeMultiplier(coverageType);
 
     const riskScore = baseRate * durationMultiplier * assetMultiplier * typeMultiplier;
     const premium = parseFloat(coverageAmount) * riskScore;

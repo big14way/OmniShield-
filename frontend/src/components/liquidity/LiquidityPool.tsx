@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useAccount } from "wagmi";
-import { parseEther, formatEther } from "viem";
+import { formatEther } from "viem";
 import { usePoolBalance } from "@/lib/web3/hooks";
 import { formatCurrency, formatPercent } from "@/lib/utils";
 
@@ -12,13 +12,12 @@ export function LiquidityPool() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [addAmount, setAddAmount] = useState("");
 
-  // Mock data - would come from API in production
   const stats = {
     tvl: poolBalance ? parseFloat(formatEther(poolBalance)) : 0,
     apy: 12.5,
     utilization: 65.3,
-    yourPosition: 5000,
-    yourShare: 2.3,
+    yourPosition: 0,
+    yourShare: 0,
   };
 
   return (

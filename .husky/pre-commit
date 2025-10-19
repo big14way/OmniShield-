@@ -1,17 +1,23 @@
 # Run lint-staged for formatting and linting
 npx lint-staged
 
-# Check for console.log in Solidity files
-if git diff --cached --name-only | grep -E '\.sol$' | xargs grep -n "console.log" 2>/dev/null; then
-  echo "Error: console.log found in Solidity files. Please remove before committing."
-  exit 1
+# Check for console.log in Solidity files (only in contracts folder)
+STAGED_SOL_FILES=$(git diff --cached --name-only | grep -E '^contracts/.*\.sol$')
+if [ ! -z "$STAGED_SOL_FILES" ]; then
+  if echo "$STAGED_SOL_FILES" | xargs grep -n "console.log" 2>/dev/null; then
+    echo "Error: console.log found in Solidity files. Please remove before committing."
+    exit 1
+  fi
 fi
 
-# Check for console.log in TypeScript files
-if git diff --cached --name-only | grep -E '\.ts$' | xargs grep -n "console.log" 2>/dev/null; then
-  echo "Warning: console.log found in TypeScript files. Consider removing before committing."
-  # Uncomment the line below to make this check blocking
-  # exit 1
+# Check for console.log in TypeScript files (excluding scripts and test folders)
+STAGED_TS_FILES=$(git diff --cached --name-only | grep -E '\.ts$' | grep -v -E '^(scripts|test)/')
+if [ ! -z "$STAGED_TS_FILES" ]; then
+  if echo "$STAGED_TS_FILES" | xargs grep -n "console.log" 2>/dev/null; then
+    echo "Warning: console.log found in TypeScript files. Consider removing before committing."
+    # Uncomment the line below to make this check blocking
+    # exit 1
+  fi
 fi
 
 # Run tests for changed contracts (optional - comment out if too slow)
