@@ -11,10 +11,11 @@ import {
 } from "@/lib/web3/hooks";
 import { formatCurrency, formatPercent } from "@/lib/utils";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { PriceDisplay } from "@/components/prices/PriceDisplay";
 
 export function LiquidityPool() {
   const { isConnected, chain, address: userAddress } = useAccount();
-  
+
   const { balance: poolBalance } = usePoolBalance();
   const { balance: userLiquidityBalance, refetch: refetchBalance } = useLiquidityProviderBalance();
   const {
@@ -56,13 +57,13 @@ export function LiquidityPool() {
       setSuccessMessage(`Successfully added ${addAmount} HBAR to liquidity pool!`);
       setLastTxHash(addHash);
       setError(null);
-      
+
       // Close modal after short delay
       setTimeout(() => {
         setIsAddModalOpen(false);
         setAddAmount("");
       }, 1500);
-      
+
       // Refetch balance multiple times
       const refetchInterval = setInterval(() => {
         refetchBalance();
@@ -84,13 +85,13 @@ export function LiquidityPool() {
       setSuccessMessage(`Successfully withdrew ${withdrawAmount} HBAR from liquidity pool!`);
       setLastTxHash(withdrawHash);
       setError(null);
-      
+
       // Close modal after short delay
       setTimeout(() => {
         setIsWithdrawModalOpen(false);
         setWithdrawAmount("");
       }, 1500);
-      
+
       // Refetch balance multiple times
       const refetchInterval = setInterval(() => {
         refetchBalance();
@@ -161,11 +162,14 @@ export function LiquidityPool() {
   const isHedera = chain?.id === 296;
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto p-6">
+    <div className="space-y-6 max-w-6xl mx-auto p-6">
       <div>
         <h2 className="text-2xl font-bold mb-2">Liquidity Pool</h2>
         <p className="text-gray-600">Provide liquidity and earn premiums from coverage purchases</p>
       </div>
+
+      {/* Real-Time Price Feeds - Powered by Pyth */}
+      <PriceDisplay />
 
       {/* Pool Stats Dashboard */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -211,18 +215,14 @@ export function LiquidityPool() {
             Your wallet is connected but we cannot detect the network. Please ensure your wallet is
             properly connected.
           </p>
-          <p className="text-sm text-gray-600">
-            Try disconnecting and reconnecting your wallet.
-          </p>
+          <p className="text-sm text-gray-600">Try disconnecting and reconnecting your wallet.</p>
         </div>
       )}
 
       {/* Unsupported Network Warning */}
       {isConnected && chain?.id && chain?.id !== 296 && (
         <div className="bg-orange-50 border-2 border-orange-300 p-8 rounded-xl text-center">
-          <h3 className="text-xl font-semibold mb-4 text-orange-800">
-            ⚠️ Unsupported Network
-          </h3>
+          <h3 className="text-xl font-semibold mb-4 text-orange-800">⚠️ Unsupported Network</h3>
           <p className="text-gray-700 mb-4">
             You&apos;re connected to <strong>{chain?.name || "Unknown Network"}</strong> (Chain ID:{" "}
             {chain?.id}), but this pool is only available on <strong>Hedera Testnet</strong>.
@@ -253,19 +253,30 @@ export function LiquidityPool() {
                 Contract Update Required
               </h3>
               <p className="text-yellow-800 mb-3">
-                The liquidity pool functions are missing from the currently deployed contract.
-                The contract needs to be redeployed with the updated code that includes:
+                The liquidity pool functions are missing from the currently deployed contract. The
+                contract needs to be redeployed with the updated code that includes:
               </p>
               <ul className="list-disc list-inside text-yellow-800 text-sm space-y-1 mb-3">
-                <li><code className="bg-yellow-100 px-1 py-0.5 rounded">addLiquidity()</code></li>
-                <li><code className="bg-yellow-100 px-1 py-0.5 rounded">withdrawLiquidity()</code></li>
-                <li><code className="bg-yellow-100 px-1 py-0.5 rounded">getLiquidityProviderBalance()</code></li>
+                <li>
+                  <code className="bg-yellow-100 px-1 py-0.5 rounded">addLiquidity()</code>
+                </li>
+                <li>
+                  <code className="bg-yellow-100 px-1 py-0.5 rounded">withdrawLiquidity()</code>
+                </li>
+                <li>
+                  <code className="bg-yellow-100 px-1 py-0.5 rounded">
+                    getLiquidityProviderBalance()
+                  </code>
+                </li>
               </ul>
               <div className="bg-yellow-100 border border-yellow-300 rounded-lg p-3 text-sm">
                 <p className="font-semibold text-yellow-900 mb-1">📋 To Fix:</p>
                 <p className="text-yellow-800">
-                  Please see <code className="bg-white px-1 py-0.5 rounded font-mono text-xs">LIQUIDITY_FIX_INSTRUCTIONS.md</code> 
-                  {" "}for deployment steps, or contact the development team.
+                  Please see{" "}
+                  <code className="bg-white px-1 py-0.5 rounded font-mono text-xs">
+                    LIQUIDITY_FIX_INSTRUCTIONS.md
+                  </code>{" "}
+                  for deployment steps, or contact the development team.
                 </p>
               </div>
             </div>

@@ -428,7 +428,7 @@ export function useAddLiquidity() {
 
   const addLiquidity = async (amount: bigint) => {
     if (!address) {
-      const errorMsg = `Contract address not found. Please ensure you're connected to a supported network. Current chain: ${chain?.name || 'Unknown'} (ID: ${chain?.id || 'N/A'})`;
+      const errorMsg = `Contract address not found. Please ensure you're connected to a supported network. Current chain: ${chain?.name || "Unknown"} (ID: ${chain?.id || "N/A"})`;
       console.error("❌", errorMsg);
       throw new Error(errorMsg);
     }
@@ -574,7 +574,7 @@ export function useWithdrawLiquidity() {
 
   const withdrawLiquidity = async (amount: bigint) => {
     if (!address) {
-      const errorMsg = `Contract address not found. Please ensure you're connected to a supported network. Current chain: ${chain?.name || 'Unknown'} (ID: ${chain?.id || 'N/A'})`;
+      const errorMsg = `Contract address not found. Please ensure you're connected to a supported network. Current chain: ${chain?.name || "Unknown"} (ID: ${chain?.id || "N/A"})`;
       console.error("❌", errorMsg);
       throw new Error(errorMsg);
     }
