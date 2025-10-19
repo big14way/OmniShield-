@@ -5,7 +5,7 @@ export class PythPriceFeeds {
   static readonly USDT_USD = "0x2b89b9dc8fdf9f34709a5b106b472f0f39bb6ca9ce04b0fd7f2e971688e2e53b";
   static readonly DAI_USD = "0xb0948a5e5313200c632b51bb5ca32f6de0d36e9950a942d19751e833f70dabfd";
   static readonly MATIC_USD = "0x5de33a9112c2b700b8d30b8a3402c103578ccfa2765696471cc672bd5cf6ac52";
-  static readonly HBAR_USD = "0x5c6c0d2386e3352356c3ab84434fafb5ea067ac2678a38a338c4a69ddc4bdb0c";
+  static readonly HBAR_USD = "0x3728e591097635310e6341af53db8b7ee42da9b3a8d918f9463ce9cca886dfbd";
   static readonly LINK_USD = "0x8ac0c70fff57e9aefdf5edf44b51d62c2d433653cbb2cf5cc06bb115af04d221";
 
   static readonly PYTH_SEPOLIA = "0xDd24F84d36BF92C65F92307595335bdFab5Bbd21";

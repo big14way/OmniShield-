@@ -43,7 +43,14 @@ export class PythPriceService {
       return {};
     }
 
-    const prices = await this.fetchLatestPrices(priceIds);
+    let prices: Record<string, PythPrice>;
+    try {
+      prices = await this.fetchLatestPrices(priceIds);
+    } catch (error) {
+      console.error("Failed to fetch live prices, using fallback:", error);
+      prices = this.getFallbackPrices(priceIds);
+    }
+
     const result: Record<string, PythPriceResponse> = {};
 
     for (const symbol of symbols) {
@@ -76,7 +83,7 @@ export class PythPriceService {
       const cleanIds = priceIds.map((id) => id.replace("0x", ""));
 
       // Build URL with proper encoding
-      const url = new URL(`${PYTH_HERMES_API}/api/latest_price_feeds`);
+      const url = new globalThis.URL(`${PYTH_HERMES_API}/api/latest_price_feeds`);
       cleanIds.forEach((id) => {
         url.searchParams.append("ids[]", id);
       });
@@ -94,10 +101,7 @@ export class PythPriceService {
         throw new Error(`Pyth API error: ${response.statusText}`);
       }
 
-      const responseText = await response.text();
-      console.log("Raw response:", responseText);
-
-      const data = JSON.parse(responseText);
+      const data = await response.json();
       console.log("Pyth API response:", data);
       const result: Record<string, PythPrice> = {};
 
@@ -119,8 +123,8 @@ export class PythPriceService {
       console.log("Parsed prices:", result);
       return result;
     } catch (error) {
-      console.error("Error fetching Pyth prices, using fallback:", error);
-      return this.getFallbackPrices(priceIds);
+      console.error("Error fetching Pyth prices:", error);
+      throw error;
     }
   }
 
@@ -132,9 +136,9 @@ export class PythPriceService {
 
   private getFallbackPrices(priceIds: string[]): Record<string, PythPrice> {
     const fallbackPrices: Record<string, number> = {
-      [PythPriceFeeds.ETH_USD]: 3245.67,
-      [PythPriceFeeds.BTC_USD]: 68234.12,
-      [PythPriceFeeds.HBAR_USD]: 0.12,
+      [PythPriceFeeds.ETH_USD]: 3985.0,
+      [PythPriceFeeds.BTC_USD]: 108900.0,
+      [PythPriceFeeds.HBAR_USD]: 0.17,
       [PythPriceFeeds.USDC_USD]: 1.0,
     };
 
