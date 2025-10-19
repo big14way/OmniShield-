@@ -15,6 +15,13 @@ export function useInsurancePool() {
   const { chain } = useAccount();
   const contractAddress = chain?.id ? CONTRACT_ADDRESSES[chain.id]?.insurancePool : undefined;
 
+  console.log("🏦 Insurance Pool Hook:", {
+    chainId: chain?.id,
+    chainName: chain?.name,
+    contractAddress,
+    availableChains: Object.keys(CONTRACT_ADDRESSES),
+  });
+
   return {
     address: contractAddress,
     abi: INSURANCE_POOL_ABI,
@@ -420,7 +427,11 @@ export function useAddLiquidity() {
   });
 
   const addLiquidity = async (amount: bigint) => {
-    if (!address) throw new Error("Contract address not found");
+    if (!address) {
+      const errorMsg = `Contract address not found. Please ensure you're connected to a supported network. Current chain: ${chain?.name || 'Unknown'} (ID: ${chain?.id || 'N/A'})`;
+      console.error("❌", errorMsg);
+      throw new Error(errorMsg);
+    }
     if (amount <= 0n) throw new Error("Amount must be greater than 0");
 
     console.log("💧 Adding liquidity:", {
@@ -552,7 +563,11 @@ export function useWithdrawLiquidity() {
   });
 
   const withdrawLiquidity = async (amount: bigint) => {
-    if (!address) throw new Error("Contract address not found");
+    if (!address) {
+      const errorMsg = `Contract address not found. Please ensure you're connected to a supported network. Current chain: ${chain?.name || 'Unknown'} (ID: ${chain?.id || 'N/A'})`;
+      console.error("❌", errorMsg);
+      throw new Error(errorMsg);
+    }
     if (amount <= 0n) throw new Error("Amount must be greater than 0");
 
     console.log("💸 Withdrawing liquidity:", {

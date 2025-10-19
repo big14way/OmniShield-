@@ -81,6 +81,12 @@ export function LiquidityPool() {
   const handleAddLiquidity = async () => {
     try {
       setError(null);
+      console.log("🚀 Starting add liquidity process...", {
+        isConnected,
+        chainId: chain?.id,
+        chainName: chain?.name,
+        amount: addAmount,
+      });
       const amount = parseEther(addAmount);
       await addLiquidity(amount);
       setAddAmount("");
