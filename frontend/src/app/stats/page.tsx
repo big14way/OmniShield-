@@ -8,10 +8,7 @@ export default function StatsPage() {
   const { isConnected } = useAccount();
   const { policies, claims, isLoading } = useUserPolicies();
 
-  const totalCoverageAmount = policies.reduce(
-    (sum, p) => sum + p.coverageAmount,
-    BigInt(0)
-  );
+  const totalCoverageAmount = policies.reduce((sum, p) => sum + p.coverageAmount, BigInt(0));
   const totalPremiumPaid = policies.reduce((sum, p) => sum + p.premium, BigInt(0));
   const activePolicies = policies.filter((p) => p.active).length;
   const totalClaims = claims.length;
@@ -70,9 +67,7 @@ export default function StatsPage() {
             <div className="text-3xl">💸</div>
             <div className="text-purple-100 text-sm">Premiums</div>
           </div>
-          <div className="text-3xl font-bold mb-1">
-            {formatEther(totalPremiumPaid).slice(0, 8)}
-          </div>
+          <div className="text-3xl font-bold mb-1">{formatEther(totalPremiumPaid).slice(0, 8)}</div>
           <div className="text-purple-100 text-sm">Total Premium Paid</div>
         </div>
 

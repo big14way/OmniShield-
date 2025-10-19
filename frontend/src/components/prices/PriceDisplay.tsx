@@ -103,9 +103,7 @@ export function PriceDisplay() {
                 <span className="text-sm font-medium text-gray-700">{displayName}</span>
                 <span
                   className={`text-xs font-semibold px-2 py-1 rounded ${
-                    isPositive
-                      ? "bg-green-100 text-green-700"
-                      : "bg-red-100 text-red-700"
+                    isPositive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
                   }`}
                 >
                   {formatChange(priceData.change24h)}
