@@ -1,8 +1,9 @@
-import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt, useSendTransaction } from "wagmi";
 import { useState } from "react";
 import { CONTRACT_ADDRESSES, INSURANCE_POOL_ABI, RISK_ENGINE_ABI } from "./contracts";
 import type { Address } from "viem";
-import { usePublicClient } from "wagmi";
+import { usePublicClient, useConfig } from "wagmi";
+import { encodeFunctionData } from "viem";
 
 export function useInsurancePool() {
   const { chain } = useAccount();
@@ -72,11 +73,19 @@ export function usePurchaseCoverage() {
   const { address, abi } = useInsurancePool();
   const { chain } = useAccount();
   const publicClient = usePublicClient();
-  const { writeContractAsync, data: hash, isPending, error: writeError } = useWriteContract();
+  
+  // Use sendTransaction for Hedera to properly send value
+  const { sendTransactionAsync, data: sendTxHash, isPending: isSendPending } = useSendTransaction();
+  const { writeContractAsync, data: writeHash, isPending: isWritePending, error: writeError } = useWriteContract();
+  
   const [isProcessing, setIsProcessing] = useState(false);
   const [manualSuccess, setManualSuccess] = useState(false);
   const [manualError, setManualError] = useState<Error | null>(null);
   const [policyId, setPolicyId] = useState<bigint | null>(null);
+  
+  // Use the appropriate hash and pending state
+  const hash = sendTxHash || writeHash;
+  const isPending = isSendPending || isWritePending;
 
   // Disable waitForTransactionReceipt for Hedera (chain 296) due to RPC incompatibility
   const isHedera = chain?.id === 296;
@@ -113,28 +122,45 @@ export function usePurchaseCoverage() {
 
     try {
       console.log("💰 Sending transaction with value:", premium.toString(), "wei");
-      console.log("📦 Transaction object:", {
-        address,
-        functionName: "createPolicy",
-        args: [coverageAmount.toString(), duration.toString()],
-        value: premium.toString(),
-        valueType: typeof premium,
-        valueHex: "0x" + premium.toString(16),
-      });
-
-      // CRITICAL: Hedera RPC requires value to be properly formatted
-      // Ensure premium is a proper bigint
+      
       const valueToSend = BigInt(premium);
       console.log("🔢 Value being sent:", valueToSend.toString(), "wei");
       console.log("🔢 Value in hex:", "0x" + valueToSend.toString(16));
-
-      const result = await writeContractAsync({
-        address,
-        abi,
-        functionName: "createPolicy",
-        args: [coverageAmount, duration],
-        value: valueToSend,
-      });
+      
+      let result: string;
+      
+      // CRITICAL FIX: On Hedera, use sendTransaction instead of writeContract
+      // because writeContract doesn't properly send the value parameter
+      if (chain?.id === 296) {
+        console.log("🔷 Using sendTransaction for Hedera (wagmi writeContract doesn't send value on Hedera)");
+        
+        // Manually encode the function call
+        const data = encodeFunctionData({
+          abi,
+          functionName: "createPolicy",
+          args: [coverageAmount, duration],
+        });
+        
+        console.log("📦 Encoded data:", data);
+        console.log("📦 Sending to:", address);
+        console.log("📦 Value:", valueToSend.toString(), "wei");
+        
+        result = await sendTransactionAsync({
+          to: address,
+          data,
+          value: valueToSend,
+          gas: 1000000n,
+        });
+      } else {
+        // Use standard writeContract for other chains
+        result = await writeContractAsync({
+          address,
+          abi,
+          functionName: "createPolicy",
+          args: [coverageAmount, duration],
+          value: valueToSend,
+        });
+      }
 
       console.log("✅ Transaction hash:", result);
 
