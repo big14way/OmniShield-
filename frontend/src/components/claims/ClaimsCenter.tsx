@@ -22,7 +22,12 @@ export function ClaimsCenter() {
 
   const { policy } = usePolicy(selectedPolicyId);
   const { submitClaim, isPending, isSuccess, hash } = useSubmitClaim();
-  const { policies, claims: userClaims, isLoading: isPoliciesLoading } = useUserPolicies();
+  const {
+    policies,
+    claims: userClaims,
+    isLoading: isPoliciesLoading,
+    refetch: refetchPolicies,
+  } = useUserPolicies();
 
   const activeCoverage = policies
     .filter((p) => p.active)
@@ -53,6 +58,12 @@ export function ClaimsCenter() {
     try {
       await submitClaim(selectedPolicyId, BigInt(claimAmount));
       setClaimAmount("");
+
+      // Refetch policies and claims after submission
+      // Add a small delay to allow the transaction to be indexed
+      setTimeout(() => {
+        refetchPolicies();
+      }, 3000);
     } catch (error) {
       console.error("Failed to submit claim:", error);
     }

@@ -28,6 +28,10 @@ export function useUserPolicies() {
   const [policies, setPolicies] = useState<Policy[]>([]);
   const [claims, setClaims] = useState<Claim[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [refetchTrigger, setRefetchTrigger] = useState(0);
+
+  // Function to manually trigger a refetch
+  const refetch = () => setRefetchTrigger((prev) => prev + 1);
 
   useEffect(() => {
     if (!address || !chain || !publicClient) return;
@@ -38,6 +42,18 @@ export function useUserPolicies() {
         const contractAddress = CONTRACT_ADDRESSES[chain.id]?.insurancePool;
         if (!contractAddress || contractAddress === "0x0000000000000000000000000000000000000000")
           return;
+
+        // Get current block number
+        const currentBlock = await publicClient.getBlockNumber();
+
+        // For Hedera, we can only query the last 7 days of logs
+        // The Hedera RPC has a 7-day (604800 seconds) limit on log queries
+        // To be safe, we'll query only the last 5 days worth of blocks
+        // Hedera blocks are produced approximately every 2-3 seconds
+        // 5 days = 432000 seconds, at ~2 seconds per block = ~216000 blocks
+        // Use 200k blocks to be conservative
+        const isHedera = chain.id === 296; // Hedera testnet
+        const fromBlock = isHedera ? currentBlock - BigInt(200000) : ("earliest" as const);
 
         const policyCreatedLogs = (await publicClient.getLogs({
           address: contractAddress,
@@ -54,7 +70,7 @@ export function useUserPolicies() {
           args: {
             holder: address,
           },
-          fromBlock: "earliest",
+          fromBlock,
           toBlock: "latest",
         })) as Log[];
 
@@ -97,7 +113,7 @@ export function useUserPolicies() {
               { type: "uint256", name: "amount" },
             ],
           },
-          fromBlock: "earliest",
+          fromBlock,
           toBlock: "latest",
         })) as Log[];
 
@@ -108,7 +124,7 @@ export function useUserPolicies() {
               id: BigInt(index),
               policyId: args?.policyId as bigint,
               amount: args?.amount as bigint,
-              timestamp: BigInt(Date.now() / 1000),
+              timestamp: BigInt(Math.floor(Date.now() / 1000)),
               txHash: log.transactionHash || "",
             };
           })
@@ -123,7 +139,7 @@ export function useUserPolicies() {
     };
 
     fetchPolicies();
-  }, [address, chain, publicClient]);
+  }, [address, chain, publicClient, refetchTrigger]);
 
-  return { policies, claims, isLoading };
+  return { policies, claims, isLoading, refetch };
 }
