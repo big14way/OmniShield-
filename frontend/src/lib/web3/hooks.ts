@@ -1,4 +1,10 @@
-import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt, useSendTransaction } from "wagmi";
+import {
+  useAccount,
+  useReadContract,
+  useWriteContract,
+  useWaitForTransactionReceipt,
+  useSendTransaction,
+} from "wagmi";
 import { useState } from "react";
 import { CONTRACT_ADDRESSES, INSURANCE_POOL_ABI, RISK_ENGINE_ABI } from "./contracts";
 import type { Address } from "viem";
@@ -73,16 +79,21 @@ export function usePurchaseCoverage() {
   const { address, abi } = useInsurancePool();
   const { chain } = useAccount();
   const publicClient = usePublicClient();
-  
+
   // Use sendTransaction for Hedera to properly send value
   const { sendTransactionAsync, data: sendTxHash, isPending: isSendPending } = useSendTransaction();
-  const { writeContractAsync, data: writeHash, isPending: isWritePending, error: writeError } = useWriteContract();
-  
+  const {
+    writeContractAsync,
+    data: writeHash,
+    isPending: isWritePending,
+    error: writeError,
+  } = useWriteContract();
+
   const [isProcessing, setIsProcessing] = useState(false);
   const [manualSuccess, setManualSuccess] = useState(false);
   const [manualError, setManualError] = useState<Error | null>(null);
   const [policyId, setPolicyId] = useState<bigint | null>(null);
-  
+
   // Use the appropriate hash and pending state
   const hash = sendTxHash || writeHash;
   const isPending = isSendPending || isWritePending;
@@ -121,30 +132,57 @@ export function usePurchaseCoverage() {
     setManualError(null);
 
     try {
-      console.log("💰 Sending transaction with value:", premium.toString(), "wei");
-      
-      const valueToSend = BigInt(premium);
+      // IMPORTANT: We cannot accurately call calculatePremium as a read-only function
+      // because it uses msg.sender to determine risk score, and msg.sender will be different
+      // when called via static call vs actual transaction.
+      //
+      // Solution: Send significantly more HBAR than the calculated premium.
+      // The contract automatically refunds excess (HederaInsurancePool.sol line 375-377)
+      //
+      // We'll multiply by 3x to ensure we send enough, since:
+      // - Risk score can vary based on user
+      // - Premium calculation includes risk adjustments
+      // - Better to overpay and get refunded than have transaction fail
+
+      // CRITICAL: On Hedera, msg.value doesn't work reliably with wagmi sendTransaction
+      // We need to send a very large amount to ensure it's enough
+      // The contract will refund the excess automatically
+      const exactPremium = premium * 1000n; // 1000x to absolutely ensure enough
+      console.log("✅ Original premium:", premium.toString(), "wei");
+      console.log("   Premium in HBAR:", (Number(premium) / 1e18).toFixed(8));
+      console.log("📊 Sending 1000x premium (Hedera workaround):", exactPremium.toString(), "wei");
+      console.log("   Amount in HBAR:", (Number(exactPremium) / 1e18).toFixed(8));
+      console.log("   💡 Excess will be automatically refunded by the contract");
+
+      console.log("💰 Sending transaction with value:", exactPremium.toString(), "wei");
+
+      const valueToSend = BigInt(exactPremium);
       console.log("🔢 Value being sent:", valueToSend.toString(), "wei");
       console.log("🔢 Value in hex:", "0x" + valueToSend.toString(16));
-      
+
+      // Note: We skip simulation because it has the same msg.sender issue as calculatePremium
+      // The actual transaction will use the correct msg.sender and calculate the right premium
+
       let result: string;
-      
+
       // CRITICAL FIX: On Hedera, use sendTransaction instead of writeContract
       // because writeContract doesn't properly send the value parameter
       if (chain?.id === 296) {
-        console.log("🔷 Using sendTransaction for Hedera (wagmi writeContract doesn't send value on Hedera)");
-        
+        console.log(
+          "🔷 Using sendTransaction for Hedera (wagmi writeContract doesn't send value on Hedera)"
+        );
+
         // Manually encode the function call
         const data = encodeFunctionData({
           abi,
           functionName: "createPolicy",
           args: [coverageAmount, duration],
         });
-        
+
         console.log("📦 Encoded data:", data);
         console.log("📦 Sending to:", address);
         console.log("📦 Value:", valueToSend.toString(), "wei");
-        
+
         result = await sendTransactionAsync({
           to: address,
           data,
