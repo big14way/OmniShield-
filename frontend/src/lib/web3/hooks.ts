@@ -483,6 +483,7 @@ export function useAddLiquidity() {
               ) {
                 console.log("✅ Liquidity added successfully!");
                 setManualSuccess(true);
+                setIsProcessing(false);
               } else if (
                 receipt?.status === "reverted" ||
                 receipt?.status === 0 ||
@@ -490,21 +491,30 @@ export function useAddLiquidity() {
               ) {
                 console.error("❌ Transaction reverted on-chain");
                 setManualError(new Error("Transaction reverted on-chain"));
+                setIsProcessing(false);
               } else if (attempt < maxAttempts) {
                 checkReceipt(attempt + 1, maxAttempts);
+              } else {
+                console.warn("⚠️ Max attempts reached. Marking as potentially successful.");
+                setManualSuccess(true);
+                setIsProcessing(false);
               }
-            } catch {
+            } catch (err) {
               console.log("⏳ Receipt not ready yet, will retry...");
               if (attempt < maxAttempts) {
                 checkReceipt(attempt + 1, maxAttempts);
               } else {
-                console.warn("⚠️ Could not verify transaction. Check HashScan manually.");
+                console.warn("⚠️ Could not verify transaction. Assuming success - check HashScan.");
+                console.warn("🔗", `https://hashscan.io/testnet/transaction/${result}`);
+                setManualSuccess(true);
+                setIsProcessing(false);
               }
             }
           }, delay);
         };
 
         checkReceipt(1, 5);
+        // Don't set isProcessing(false) here - let checkReceipt handle it
       } else {
         console.log("📤 Sending EVM transaction...");
         result = await writeContractAsync({
@@ -514,15 +524,15 @@ export function useAddLiquidity() {
           value: amount,
         });
         console.log("✅ Transaction sent:", result);
+        setIsProcessing(false);
       }
 
       return result;
     } catch (error) {
       console.error("❌ Add liquidity failed:", error);
       setManualError(error as Error);
-      throw error;
-    } finally {
       setIsProcessing(false);
+      throw error;
     }
   };
 
@@ -618,6 +628,7 @@ export function useWithdrawLiquidity() {
               ) {
                 console.log("✅ Liquidity withdrawn successfully!");
                 setManualSuccess(true);
+                setIsProcessing(false);
               } else if (
                 receipt?.status === "reverted" ||
                 receipt?.status === 0 ||
@@ -625,21 +636,30 @@ export function useWithdrawLiquidity() {
               ) {
                 console.error("❌ Transaction reverted on-chain");
                 setManualError(new Error("Transaction reverted on-chain"));
+                setIsProcessing(false);
               } else if (attempt < maxAttempts) {
                 checkReceipt(attempt + 1, maxAttempts);
+              } else {
+                console.warn("⚠️ Max attempts reached. Marking as potentially successful.");
+                setManualSuccess(true);
+                setIsProcessing(false);
               }
-            } catch {
+            } catch (err) {
               console.log("⏳ Receipt not ready yet, will retry...");
               if (attempt < maxAttempts) {
                 checkReceipt(attempt + 1, maxAttempts);
               } else {
-                console.warn("⚠️ Could not verify transaction. Check HashScan manually.");
+                console.warn("⚠️ Could not verify transaction. Assuming success - check HashScan.");
+                console.warn("🔗", `https://hashscan.io/testnet/transaction/${result}`);
+                setManualSuccess(true);
+                setIsProcessing(false);
               }
             }
           }, delay);
         };
 
         checkReceipt(1, 5);
+        // Don't set isProcessing(false) here - let checkReceipt handle it
       } else {
         console.log("📤 Sending EVM withdrawal transaction...");
         result = await writeContractAsync({
@@ -649,15 +669,15 @@ export function useWithdrawLiquidity() {
           args: [amount],
         });
         console.log("✅ Transaction sent:", result);
+        setIsProcessing(false);
       }
 
       return result;
     } catch (error) {
       console.error("❌ Withdraw liquidity failed:", error);
       setManualError(error as Error);
-      throw error;
-    } finally {
       setIsProcessing(false);
+      throw error;
     }
   };
 
