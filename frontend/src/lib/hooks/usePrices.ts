@@ -40,7 +40,8 @@ export function usePrices(symbols: string[]) {
     const interval = setInterval(fetchPrices, 30000);
 
     return () => clearInterval(interval);
-  }, [symbols]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [symbols.join(",")]);
 
   return { prices, isLoading, error };
 }
