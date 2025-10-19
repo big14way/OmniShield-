@@ -25,19 +25,32 @@ export class PythPriceService {
     const priceIds: string[] = [];
     const symbolToPriceId: Record<string, string> = {};
 
+    console.log("Fetching prices for symbols:", symbols);
+
     for (const symbol of symbols) {
       const priceId = PythPriceFeeds.getPriceFeedId(symbol);
+      console.log(`Symbol: ${symbol}, Price ID: ${priceId}`);
       if (priceId) {
         priceIds.push(priceId);
         symbolToPriceId[symbol] = priceId;
       }
     }
 
+    console.log("Price IDs to fetch:", priceIds);
+
     if (priceIds.length === 0) {
+      console.warn("No valid price IDs found!");
       return {};
     }
 
-    const prices = await this.fetchLatestPrices(priceIds);
+    let prices: Record<string, PythPrice>;
+    try {
+      prices = await this.fetchLatestPrices(priceIds);
+    } catch (error) {
+      console.error("Failed to fetch live prices, using fallback:", error);
+      prices = this.getFallbackPrices(priceIds);
+    }
+
     const result: Record<string, PythPriceResponse> = {};
 
     for (const symbol of symbols) {
@@ -66,20 +79,35 @@ export class PythPriceService {
 
   async fetchLatestPrices(priceIds: string[]): Promise<Record<string, PythPrice>> {
     try {
-      const idsParam = priceIds.map((id) => `ids[]=${id}`).join("&");
-      const response = await globalThis.fetch(
-        `${PYTH_HERMES_API}/v2/updates/price/latest?${idsParam}`
-      );
+      // Remove 0x prefix for API call
+      const cleanIds = priceIds.map((id) => id.replace("0x", ""));
+
+      // Build URL with proper encoding
+      const url = new globalThis.URL(`${PYTH_HERMES_API}/api/latest_price_feeds`);
+      cleanIds.forEach((id) => {
+        url.searchParams.append("ids[]", id);
+      });
+
+      console.log("Fetching Pyth prices from:", url.toString());
+
+      const response = await globalThis.fetch(url);
+
+      console.log("Response status:", response.status, response.statusText);
 
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Pyth API error: ${response.status} ${response.statusText}`);
+        console.error("Error response body:", errorText);
         throw new Error(`Pyth API error: ${response.statusText}`);
       }
 
       const data = await response.json();
+      console.log("Pyth API response:", data);
       const result: Record<string, PythPrice> = {};
 
-      if (data.parsed) {
-        for (const priceData of data.parsed) {
+      // data is an array of price feeds
+      if (Array.isArray(data)) {
+        for (const priceData of data) {
           const id = `0x${priceData.id}`;
           const priceInfo = priceData.price;
 
@@ -92,41 +120,25 @@ export class PythPriceService {
         }
       }
 
+      console.log("Parsed prices:", result);
       return result;
-    } catch {
-      return this.getFallbackPrices(priceIds);
+    } catch (error) {
+      console.error("Error fetching Pyth prices:", error);
+      throw error;
     }
   }
 
-  private async calculate24hChange(priceId: string, currentPrice: number): Promise<number> {
-    try {
-      const oneDayAgo = Math.floor(Date.now() / 1000) - 86400;
-      const response = await globalThis.fetch(
-        `${PYTH_HERMES_API}/v2/updates/price/${oneDayAgo}?ids[]=${priceId}`
-      );
-
-      if (!response.ok) {
-        return 0;
-      }
-
-      const data = await response.json();
-      if (data.parsed && data.parsed.length > 0) {
-        const priceInfo = data.parsed[0].price;
-        const oldPrice = parseFloat(priceInfo.price) * Math.pow(10, priceInfo.expo);
-        return ((currentPrice - oldPrice) / oldPrice) * 100;
-      }
-
-      return 0;
-    } catch {
-      return 0;
-    }
+  private async calculate24hChange(_priceId: string, _currentPrice: number): Promise<number> {
+    // TODO: Implement 24h change calculation using EMA price comparison or price history
+    // For now, return 0 as the historical price API endpoint needs to be implemented
+    return 0;
   }
 
   private getFallbackPrices(priceIds: string[]): Record<string, PythPrice> {
     const fallbackPrices: Record<string, number> = {
-      [PythPriceFeeds.ETH_USD]: 3245.67,
-      [PythPriceFeeds.BTC_USD]: 68234.12,
-      [PythPriceFeeds.HBAR_USD]: 0.12,
+      [PythPriceFeeds.ETH_USD]: 3985.0,
+      [PythPriceFeeds.BTC_USD]: 108900.0,
+      [PythPriceFeeds.HBAR_USD]: 0.17,
       [PythPriceFeeds.USDC_USD]: 1.0,
     };
 
