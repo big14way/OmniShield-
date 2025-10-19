@@ -74,9 +74,14 @@ export class PythPriceService {
     try {
       // Remove 0x prefix for API call
       const cleanIds = priceIds.map((id) => id.replace("0x", ""));
-      const idsParam = cleanIds.map((id) => `ids[]=${id}`).join("&");
-      const url = `${PYTH_HERMES_API}/api/latest_price_feeds?${idsParam}`;
-      console.log("Fetching Pyth prices from:", url);
+
+      // Build URL with proper encoding
+      const url = new URL(`${PYTH_HERMES_API}/api/latest_price_feeds`);
+      cleanIds.forEach((id) => {
+        url.searchParams.append("ids[]", id);
+      });
+
+      console.log("Fetching Pyth prices from:", url.toString());
 
       const response = await globalThis.fetch(url);
 
