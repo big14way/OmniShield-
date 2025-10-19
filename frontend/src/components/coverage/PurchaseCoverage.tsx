@@ -85,10 +85,18 @@ export function PurchaseCoverage() {
         alert("Duration cannot be zero");
         return;
       }
-      if (premium === 0n) {
-        alert("Premium cannot be zero");
+      if (!premium || premium === 0n) {
+        alert("Premium is not calculated yet. Please wait a moment and try again.");
         return;
       }
+      
+      console.log("✅ All validations passed, proceeding with purchase...");
+      console.log("🔍 Final check - Premium value:", {
+        premium,
+        premiumString: premium.toString(),
+        premiumType: typeof premium,
+        isZero: premium === 0n,
+      });
       
       const txHash = await purchaseCoverage(coverageAmountWei, durationSeconds, premium);
       
@@ -276,6 +284,9 @@ export function PurchaseCoverage() {
           <div>• Duration: {duration} days ({durationSeconds.toString()} seconds)</div>
           <div>• Premium Loading: {isPremiumLoading ? '⏳' : '✅'}</div>
           <div>• Premium: {premium ? formatEther(premium) : 'null'} HBAR</div>
+          <div>• Premium Wei: {premium?.toString() || 'null'}</div>
+          <div>• Premium Type: {premium ? typeof premium : 'undefined'}</div>
+          <div>• Premium === 0n: {premium === 0n ? 'YES' : 'NO'}</div>
           <div>• Can Purchase: {canPurchase ? '✅' : '❌'}</div>
         </div>
       )}

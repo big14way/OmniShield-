@@ -99,12 +99,27 @@ export function usePurchaseCoverage() {
       coverageAmount: coverageAmount.toString(),
       duration: duration.toString(),
       premium: premium.toString(),
+      premiumInEth: (Number(premium) / 1e18).toFixed(6),
     });
+
+    // Validate premium is not zero
+    if (!premium || premium === 0n) {
+      throw new Error("Premium cannot be zero. Please wait for premium calculation.");
+    }
 
     setIsProcessing(true);
     setManualSuccess(false);
+    setManualError(null);
     
     try {
+      console.log("💰 Sending transaction with value:", premium.toString(), "wei");
+      console.log("📦 Transaction object:", {
+        address,
+        functionName: "createPolicy",
+        args: [coverageAmount.toString(), duration.toString()],
+        value: premium.toString(),
+      });
+      
       const result = await writeContractAsync({
         address,
         abi,
