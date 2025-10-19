@@ -28,6 +28,10 @@ export function useUserPolicies() {
   const [policies, setPolicies] = useState<Policy[]>([]);
   const [claims, setClaims] = useState<Claim[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [refetchTrigger, setRefetchTrigger] = useState(0);
+
+  // Function to manually trigger a refetch
+  const refetch = () => setRefetchTrigger((prev) => prev + 1);
 
   useEffect(() => {
     if (!address || !chain || !publicClient) return;
@@ -135,7 +139,7 @@ export function useUserPolicies() {
     };
 
     fetchPolicies();
-  }, [address, chain, publicClient]);
+  }, [address, chain, publicClient, refetchTrigger]);
 
-  return { policies, claims, isLoading };
+  return { policies, claims, isLoading, refetch };
 }
