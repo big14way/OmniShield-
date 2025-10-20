@@ -220,14 +220,13 @@ export function usePurchaseCoverage() {
         const checkReceipt = async (attempt = 1, maxAttempts = 3) => {
           try {
             console.log(`🔍 Checking receipt (attempt ${attempt}/${maxAttempts})...`);
-            const receipt = await publicClient?.getTransactionReceipt({ hash: result as `0x${string}` });
+            const receipt = await publicClient?.getTransactionReceipt({
+              hash: result as `0x${string}`,
+            });
             console.log("📄 Transaction receipt:", receipt);
 
             // Check transaction status
-            if (
-              receipt?.status === "reverted" ||
-              receipt?.status === ("0x0" as unknown)
-            ) {
+            if (receipt?.status === "reverted" || receipt?.status === ("0x0" as unknown)) {
               console.error("❌ Transaction reverted on-chain!");
               console.error("Receipt:", receipt);
               console.error(
@@ -472,20 +471,16 @@ export function useAddLiquidity() {
 
           setTimeout(async () => {
             try {
-              const receipt = await publicClient?.getTransactionReceipt({ hash: result as `0x${string}` });
+              const receipt = await publicClient?.getTransactionReceipt({
+                hash: result as `0x${string}`,
+              });
               console.log("📄 Receipt status:", receipt?.status);
 
-              if (
-                receipt?.status === "success" ||
-                receipt?.status === ("0x1" as unknown)
-              ) {
+              if (receipt?.status === "success" || receipt?.status === ("0x1" as unknown)) {
                 console.log("✅ Liquidity added successfully!");
                 setManualSuccess(true);
                 setIsProcessing(false);
-              } else if (
-                receipt?.status === "reverted" ||
-                receipt?.status === ("0x0" as unknown)
-              ) {
+              } else if (receipt?.status === "reverted" || receipt?.status === ("0x0" as unknown)) {
                 console.error("❌ Transaction reverted on-chain");
                 setManualError(new Error("Transaction reverted on-chain"));
                 setIsProcessing(false);
@@ -615,20 +610,16 @@ export function useWithdrawLiquidity() {
 
           setTimeout(async () => {
             try {
-              const receipt = await publicClient?.getTransactionReceipt({ hash: result as `0x${string}` });
+              const receipt = await publicClient?.getTransactionReceipt({
+                hash: result as `0x${string}`,
+              });
               console.log("📄 Receipt status:", receipt?.status);
 
-              if (
-                receipt?.status === "success" ||
-                receipt?.status === ("0x1" as unknown)
-              ) {
+              if (receipt?.status === "success" || receipt?.status === ("0x1" as unknown)) {
                 console.log("✅ Liquidity withdrawn successfully!");
                 setManualSuccess(true);
                 setIsProcessing(false);
-              } else if (
-                receipt?.status === "reverted" ||
-                receipt?.status === ("0x0" as unknown)
-              ) {
+              } else if (receipt?.status === "reverted" || receipt?.status === ("0x0" as unknown)) {
                 console.error("❌ Transaction reverted on-chain");
                 setManualError(new Error("Transaction reverted on-chain"));
                 setIsProcessing(false);
