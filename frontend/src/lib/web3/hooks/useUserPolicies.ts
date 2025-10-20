@@ -55,7 +55,7 @@ export function useUserPolicies() {
         const isHedera = chain.id === 296; // Hedera testnet
         const fromBlock = isHedera ? currentBlock - BigInt(200000) : ("earliest" as const);
 
-        const allLogs = (await publicClient.getLogs({
+        const logParams: Record<string, unknown> = {
           address: contractAddress,
           event: {
             type: "event",
@@ -69,13 +69,13 @@ export function useUserPolicies() {
           },
           fromBlock,
           toBlock: "latest",
-        })) as Log[];
+        };
 
-        // Filter logs for the specific address
-        const policyCreatedLogs = allLogs.filter((log) => {
-          const args = (log as { args?: Record<string, unknown> }).args;
-          return args?.holder === address;
-        });
+        if (address) {
+          logParams.args = { holder: address };
+        }
+
+        const policyCreatedLogs = (await publicClient.getLogs(logParams)) as Log[];
 
         const policiesData: Policy[] = await Promise.all(
           policyCreatedLogs.map(async (log: Log) => {
