@@ -7,7 +7,7 @@ import { CCIPService } from "@/lib/integrations/ccip";
 import { formatCurrency } from "@/lib/utils";
 
 export function CrossChainCoverage() {
-  const { address, isConnected, chain } = useAccount();
+  const { address, isConnected } = useAccount();
   const [selectedChain, setSelectedChain] = useState<string>("");
   const [coverageAmount, setCoverageAmount] = useState("");
   const [duration, setDuration] = useState(30);
@@ -28,11 +28,7 @@ export function CrossChainCoverage() {
 
       if (!chainConfig) return;
 
-      const estimatedFee = await CCIPService.estimateCrossChainFee(
-        chain?.id || 0,
-        chainConfig.chainId,
-        parseEther(coverageAmount)
-      );
+      const estimatedFee = await CCIPService.estimateCrossChainFee();
 
       writeContract({
         address: "0x0000000000000000000000000000000000000000",

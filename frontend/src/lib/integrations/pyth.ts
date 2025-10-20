@@ -57,7 +57,7 @@ export class PythPriceService {
       const priceId = symbolToPriceId[symbol];
       if (priceId && prices[priceId]) {
         const priceData = prices[priceId];
-        const change24h = await this.calculate24hChange(priceId, priceData.price);
+        const change24h = await this.calculate24hChange();
 
         result[symbol] = {
           symbol,
@@ -128,7 +128,7 @@ export class PythPriceService {
     }
   }
 
-  private async calculate24hChange(_priceId: string, _currentPrice: number): Promise<number> {
+  private async calculate24hChange(): Promise<number> {
     // TODO: Implement 24h change calculation using EMA price comparison or price history
     // For now, return 0 as the historical price API endpoint needs to be implemented
     return 0;
