@@ -499,7 +499,7 @@ export function useAddLiquidity() {
                 setManualSuccess(true);
                 setIsProcessing(false);
               }
-            } catch (err) {
+            } catch {
               console.log("⏳ Receipt not ready yet, will retry...");
               if (attempt < maxAttempts) {
                 checkReceipt(attempt + 1, maxAttempts);
@@ -644,7 +644,7 @@ export function useWithdrawLiquidity() {
                 setManualSuccess(true);
                 setIsProcessing(false);
               }
-            } catch (err) {
+            } catch {
               console.log("⏳ Receipt not ready yet, will retry...");
               if (attempt < maxAttempts) {
                 checkReceipt(attempt + 1, maxAttempts);
