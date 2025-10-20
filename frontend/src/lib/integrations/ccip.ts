@@ -66,7 +66,11 @@ export class CCIPService {
     return chain?.enabled || false;
   }
 
-  static async estimateCrossChainFee(): Promise<bigint> {
+  static async estimateCrossChainFee(
+    _sourceChainId: number,
+    _destinationChainId: number,
+    _amount: bigint
+  ): Promise<bigint> {
     const baseGas = 200000n;
     const gasPrice = 100000000n;
     const ccipFee = 100000000000000n;
