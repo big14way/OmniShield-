@@ -226,7 +226,7 @@ export function usePurchaseCoverage() {
             console.log("📄 Transaction receipt:", receipt);
 
             // Check transaction status
-            if (receipt?.status === "reverted" || receipt?.status === ("0x0" as unknown)) {
+            if (receipt?.status === "reverted") {
               console.error("❌ Transaction reverted on-chain!");
               console.error("Receipt:", receipt);
               console.error(
@@ -252,7 +252,7 @@ export function usePurchaseCoverage() {
                 // PolicyCreated event signature: PolicyCreated(uint256,address,uint256,uint256)
                 // First topic is event signature, second is policyId (indexed)
                 if (log.topics.length >= 2 && log.topics[1]) {
-                  const extractedPolicyId = BigInt(log.topics[1]);
+                  const extractedPolicyId = BigInt(log.topics[1]!);
                   console.log("🎫 Policy ID from event:", extractedPolicyId.toString());
                   setPolicyId(extractedPolicyId);
                   break;
@@ -476,11 +476,11 @@ export function useAddLiquidity() {
               });
               console.log("📄 Receipt status:", receipt?.status);
 
-              if (receipt?.status === "success" || receipt?.status === ("0x1" as unknown)) {
+              if (receipt?.status === "success") {
                 console.log("✅ Liquidity added successfully!");
                 setManualSuccess(true);
                 setIsProcessing(false);
-              } else if (receipt?.status === "reverted" || receipt?.status === ("0x0" as unknown)) {
+              } else if (receipt?.status === "reverted") {
                 console.error("❌ Transaction reverted on-chain");
                 setManualError(new Error("Transaction reverted on-chain"));
                 setIsProcessing(false);
@@ -615,11 +615,11 @@ export function useWithdrawLiquidity() {
               });
               console.log("📄 Receipt status:", receipt?.status);
 
-              if (receipt?.status === "success" || receipt?.status === ("0x1" as unknown)) {
+              if (receipt?.status === "success") {
                 console.log("✅ Liquidity withdrawn successfully!");
                 setManualSuccess(true);
                 setIsProcessing(false);
-              } else if (receipt?.status === "reverted" || receipt?.status === ("0x0" as unknown)) {
+              } else if (receipt?.status === "reverted") {
                 console.error("❌ Transaction reverted on-chain");
                 setManualError(new Error("Transaction reverted on-chain"));
                 setIsProcessing(false);

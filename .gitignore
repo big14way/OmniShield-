@@ -48,3 +48,4 @@ tmp/
 temp/
 frontend/.next
 frontend/node_modules
+.vercel
