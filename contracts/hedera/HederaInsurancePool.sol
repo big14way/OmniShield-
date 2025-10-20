@@ -75,6 +75,7 @@ contract HederaInsurancePool is IInsurancePool, AccessControl, ReentrancyGuard, 
     mapping(uint256 => ClaimSubmission) public claimSubmissions;
     mapping(address => bool) public associatedHtsTokens;
     mapping(bytes32 => bool) public verifiedEd25519Keys;
+    mapping(address => uint256) private liquidityProviders;
 
     IRiskEngine public riskEngine;
 
@@ -114,6 +115,12 @@ contract HederaInsurancePool is IInsurancePool, AccessControl, ReentrancyGuard, 
 
     /// @notice Emitted when ED25519 key is verified
     event Ed25519KeyVerified(bytes32 indexed publicKeyHash);
+
+    /// @notice Emitted when liquidity is added
+    event LiquidityAdded(address indexed provider, uint256 amount);
+
+    /// @notice Emitted when liquidity is withdrawn
+    event LiquidityWithdrawn(address indexed provider, uint256 amount);
 
     // ============ Constructor ============
 
@@ -450,6 +457,44 @@ contract HederaInsurancePool is IInsurancePool, AccessControl, ReentrancyGuard, 
     function withdrawHbar(uint256 amount) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(amount <= address(this).balance, "Insufficient balance");
         payable(hbarTreasuryAccount).transfer(amount);
+    }
+
+    // ============ Liquidity Pool Functions ============
+
+    /// @notice Add liquidity to the pool
+    function addLiquidity() external payable nonReentrant {
+        require(msg.value > 0, "Must send HBAR");
+
+        liquidityProviders[msg.sender] += msg.value;
+        totalPoolBalance += msg.value;
+
+        emit LiquidityAdded(msg.sender, msg.value);
+    }
+
+    /// @notice Withdraw liquidity from the pool
+    /// @param amount Amount to withdraw in wei
+    function withdrawLiquidity(uint256 amount) external nonReentrant {
+        require(amount > 0, "Amount must be greater than 0");
+        require(liquidityProviders[msg.sender] >= amount, "Insufficient liquidity balance");
+        require(address(this).balance >= amount, "Insufficient pool balance");
+
+        liquidityProviders[msg.sender] -= amount;
+        if (totalPoolBalance >= amount) {
+            totalPoolBalance -= amount;
+        } else {
+            totalPoolBalance = 0;
+        }
+
+        payable(msg.sender).transfer(amount);
+
+        emit LiquidityWithdrawn(msg.sender, amount);
+    }
+
+    /// @notice Get liquidity provider balance
+    /// @param provider Address of the liquidity provider
+    /// @return balance Provider's liquidity balance
+    function getLiquidityProviderBalance(address provider) external view returns (uint256 balance) {
+        return liquidityProviders[provider];
     }
 
     /// @notice Receive HBAR

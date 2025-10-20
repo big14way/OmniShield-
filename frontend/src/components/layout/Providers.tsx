@@ -2,7 +2,8 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider } from "wagmi";
-import { config } from "@/lib/web3/config";
+import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
+import { config, hederaTestnet } from "@/lib/web3/config";
 import { useState, type ReactNode } from "react";
 
 export function Providers({ children }: { children: ReactNode }) {
@@ -10,7 +11,9 @@ export function Providers({ children }: { children: ReactNode }) {
 
   return (
     <WagmiProvider config={config}>
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      <QueryClientProvider client={queryClient}>
+        <RainbowKitProvider initialChain={hederaTestnet}>{children}</RainbowKitProvider>
+      </QueryClientProvider>
     </WagmiProvider>
   );
 }

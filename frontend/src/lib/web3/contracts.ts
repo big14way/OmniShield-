@@ -20,7 +20,7 @@ export const CONTRACT_ADDRESSES: Record<number, ContractAddresses> = {
     ccipBridge: "0x0000000000000000000000000000000000000000",
   },
   [hederaTestnet.id]: {
-    insurancePool: "0x525C7063E7C20997BaaE9bDa922159152D0e8417",
+    insurancePool: "0xd6e1afe5cA8D00A2EFC01B89997abE2De47fdfAf", // Updated with liquidity functions
     riskEngine: "0x5bf5b11053e734690269C6B9D438F8C9d48F528A",
     claimsProcessor: "0x3aAde2dCD2Df6a8cAc689EE797591b2913658659",
     hederaBridge: "0xab16A69A5a8c12C732e0DEFF4BE56A70bb64c926",
@@ -87,6 +87,27 @@ export const INSURANCE_POOL_ABI = [
     type: "function",
   },
   {
+    inputs: [],
+    name: "addLiquidity",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [{ name: "amount", type: "uint256" }],
+    name: "withdrawLiquidity",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [{ name: "provider", type: "address" }],
+    name: "getLiquidityProviderBalance",
+    outputs: [{ name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     anonymous: false,
     inputs: [
       { indexed: true, name: "policyId", type: "uint256" },
@@ -95,6 +116,24 @@ export const INSURANCE_POOL_ABI = [
       { indexed: false, name: "premium", type: "uint256" },
     ],
     name: "PolicyCreated",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: true, name: "provider", type: "address" },
+      { indexed: false, name: "amount", type: "uint256" },
+    ],
+    name: "LiquidityAdded",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: true, name: "provider", type: "address" },
+      { indexed: false, name: "amount", type: "uint256" },
+    ],
+    name: "LiquidityWithdrawn",
     type: "event",
   },
   {
