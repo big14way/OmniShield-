@@ -10,8 +10,9 @@
 !.yarn/releases
 !.yarn/versions
 
-# testing
+# testing (coverage reports, not src/components/coverage)
 /coverage
+!/src/components/coverage
 
 # next.js
 /.next/
