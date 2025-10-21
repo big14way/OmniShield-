@@ -154,7 +154,11 @@ export function usePurchaseCoverage() {
       const exactPremium = premium + premium / 10n; // 110% of premium
       console.log("✅ Premium calculated:", premium.toString(), "wei");
       console.log("   Premium in HBAR:", (Number(premium) / 1e18).toFixed(8));
-      console.log("💰 Sending 110% of premium (10% safety buffer):", exactPremium.toString(), "wei");
+      console.log(
+        "💰 Sending 110% of premium (10% safety buffer):",
+        exactPremium.toString(),
+        "wei"
+      );
       console.log("   Amount in HBAR:", (Number(exactPremium) / 1e18).toFixed(8));
       console.log("   💡 Small excess will be automatically refunded by the contract");
 
