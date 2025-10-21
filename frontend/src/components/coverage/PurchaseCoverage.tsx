@@ -100,8 +100,8 @@ export function PurchaseCoverage() {
         return;
       }
 
-      // Check if user has enough balance (110% of premium for safety buffer)
-      const requiredBalance = premium + premium / 10n;
+      // Check if user has enough balance (150% of premium for safety buffer)
+      const requiredBalance = premium + premium / 2n;
       const userBalance = balance?.value || 0n;
 
       if (userBalance < requiredBalance) {

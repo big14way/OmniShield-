@@ -142,7 +142,7 @@ export function usePurchaseCoverage() {
       // Premium calculation uses msg.sender which is consistent between
       // read-only calls and actual transactions (both use user's wallet address).
       //
-      // We add a small 10% buffer to handle:
+      // We add a 50% buffer to handle:
       // - Potential rounding differences
       // - Gas price fluctuations
       // - Any minor state changes between calculation and execution
@@ -150,17 +150,17 @@ export function usePurchaseCoverage() {
       // The contract automatically refunds excess HBAR (HederaInsurancePool.sol line 375-377)
 
       // Use exact premium calculated by the contract
-      // Add 10% buffer for safety (rounding, gas fluctuations)
-      const exactPremium = premium + premium / 10n; // 110% of premium
+      // Add 50% buffer for safety (was 10%, but increasing to debug revert issue)
+      const exactPremium = premium + premium / 2n; // 150% of premium
       console.log("✅ Premium calculated:", premium.toString(), "wei");
       console.log("   Premium in HBAR:", (Number(premium) / 1e18).toFixed(8));
       console.log(
-        "💰 Sending 110% of premium (10% safety buffer):",
+        "💰 Sending 150% of premium (50% safety buffer):",
         exactPremium.toString(),
         "wei"
       );
       console.log("   Amount in HBAR:", (Number(exactPremium) / 1e18).toFixed(8));
-      console.log("   💡 Small excess will be automatically refunded by the contract");
+      console.log("   💡 Excess HBAR will be automatically refunded by the contract");
 
       console.log("💰 Sending transaction with value:", exactPremium.toString(), "wei");
 
