@@ -16,18 +16,20 @@ describe("HederaInsurancePoolFixed", function () {
 
     // Deploy RiskEngine
     const RiskEngine = await ethers.getContractFactory("RiskEngine");
-    riskEngine = await RiskEngine.deploy();
-    await riskEngine.waitForDeployment();
+    const riskEngineContract = await RiskEngine.deploy();
+    await riskEngineContract.waitForDeployment();
+    riskEngine = riskEngineContract as any as RiskEngine;
 
     // Deploy HederaInsurancePoolFixed
     const HederaInsurancePoolFixed = await ethers.getContractFactory("HederaInsurancePoolFixed");
-    insurancePool = await HederaInsurancePoolFixed.deploy(
+    const insurancePoolContract = await HederaInsurancePoolFixed.deploy(
       await riskEngine.getAddress(),
       treasury.address,
       ethers.ZeroAddress, // htsToken
       ethers.ZeroHash // consensusTopic
     );
-    await insurancePool.waitForDeployment();
+    await insurancePoolContract.waitForDeployment();
+    insurancePool = insurancePoolContract as any as HederaInsurancePoolFixed;
   });
 
   describe("Policy Creation - Fixed Version", function () {

@@ -92,7 +92,7 @@ async function main() {
     const impersonatedProvider = await ethers.getImpersonatedSigner(userAddress);
     const poolWithSigner = pool.connect(impersonatedProvider);
 
-    const result = await poolWithSigner.createPolicy.staticCall(coverageAmount, duration, {
+    const result = await (poolWithSigner as any).createPolicy.staticCall(coverageAmount, duration, {
       value: valueToSend,
     });
     console.log("✅ Static call succeeded! Policy ID would be:", result.toString());
