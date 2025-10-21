@@ -139,13 +139,13 @@ export function usePurchaseCoverage() {
     setManualError(null);
 
     try {
-      // CRITICAL FIX: Send way more HBAR to debug the issue
-      // The contract calculates premium internally and compares to msg.value
-      // Due to potential rounding differences between JS/Solidity, we need a large buffer
-      // The contract automatically refunds excess HBAR (HederaInsurancePool.sol line 382-384)
+      // CRITICAL FIX: Hedera uses 8 decimals (tinybars) not 18 decimals (wei)
+      // Need to divide by 10^10 to convert from wei to tinybars
+      // 1 HBAR = 10^8 tinybars = 10^18 wei
+      // So: tinybars = wei / 10^10
 
-      // Send coverageAmount worth of HBAR (since premium is typically ~1% of coverage)
-      const exactPremium = coverageAmount; // Send full coverage amount worth of HBAR
+      const premiumInTinybars = premium / (10n ** 10n); // Convert wei to tinybars
+      const exactPremium = premiumInTinybars * 2n; // Send 2x for safety buffer
       console.log("✅ Premium calculated:", premium.toString(), "wei");
       console.log("   Premium in HBAR:", (Number(premium) / 1e18).toFixed(8));
       console.log("�� Sending 1000% of premium (10x safety buffer):", exactPremium.toString(), "wei");
