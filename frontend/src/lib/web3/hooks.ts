@@ -139,27 +139,24 @@ export function usePurchaseCoverage() {
     setManualError(null);
 
     try {
-      // IMPORTANT: We cannot accurately call calculatePremium as a read-only function
-      // because it uses msg.sender to determine risk score, and msg.sender will be different
-      // when called via static call vs actual transaction.
+      // Premium calculation uses msg.sender which is consistent between
+      // read-only calls and actual transactions (both use user's wallet address).
       //
-      // Solution: Send significantly more HBAR than the calculated premium.
-      // The contract automatically refunds excess (HederaInsurancePool.sol line 375-377)
+      // We add a small 10% buffer to handle:
+      // - Potential rounding differences
+      // - Gas price fluctuations
+      // - Any minor state changes between calculation and execution
       //
-      // We'll multiply by 3x to ensure we send enough, since:
-      // - Risk score can vary based on user
-      // - Premium calculation includes risk adjustments
-      // - Better to overpay and get refunded than have transaction fail
+      // The contract automatically refunds excess HBAR (HederaInsurancePool.sol line 375-377)
 
-      // CRITICAL: On Hedera, msg.value doesn't work reliably with wagmi sendTransaction
-      // We need to send a very large amount to ensure it's enough
-      // The contract will refund the excess automatically
-      const exactPremium = premium * 1000n; // 1000x to absolutely ensure enough
-      console.log("✅ Original premium:", premium.toString(), "wei");
+      // Use exact premium calculated by the contract
+      // Add 10% buffer for safety (rounding, gas fluctuations)
+      const exactPremium = premium + premium / 10n; // 110% of premium
+      console.log("✅ Premium calculated:", premium.toString(), "wei");
       console.log("   Premium in HBAR:", (Number(premium) / 1e18).toFixed(8));
-      console.log("📊 Sending 1000x premium (Hedera workaround):", exactPremium.toString(), "wei");
+      console.log("💰 Sending 110% of premium (10% safety buffer):", exactPremium.toString(), "wei");
       console.log("   Amount in HBAR:", (Number(exactPremium) / 1e18).toFixed(8));
-      console.log("   💡 Excess will be automatically refunded by the contract");
+      console.log("   💡 Small excess will be automatically refunded by the contract");
 
       console.log("💰 Sending transaction with value:", exactPremium.toString(), "wei");
 
