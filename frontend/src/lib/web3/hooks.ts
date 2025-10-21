@@ -139,15 +139,15 @@ export function usePurchaseCoverage() {
     setManualError(null);
 
     try {
-      // CRITICAL FIX: Send 5x the calculated premium
+      // CRITICAL FIX: Send 10x the calculated premium
       // The contract calculates premium internally and compares to msg.value
       // Due to potential rounding differences between JS/Solidity, we need a large buffer
       // The contract automatically refunds excess HBAR (HederaInsurancePool.sol line 382-384)
 
-      const exactPremium = premium * 5n; // 500% of premium (5x for safety)
+      const exactPremium = premium * 10n; // 1000% of premium (10x for safety)
       console.log("✅ Premium calculated:", premium.toString(), "wei");
       console.log("   Premium in HBAR:", (Number(premium) / 1e18).toFixed(8));
-      console.log("�� Sending 500% of premium (5x safety buffer):", exactPremium.toString(), "wei");
+      console.log("�� Sending 1000% of premium (10x safety buffer):", exactPremium.toString(), "wei");
       console.log("   Amount in HBAR:", (Number(exactPremium) / 1e18).toFixed(8));
       console.log("   💡 Excess HBAR will be automatically refunded by the contract");
 
