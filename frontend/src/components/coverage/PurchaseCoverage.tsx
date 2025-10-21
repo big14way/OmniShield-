@@ -298,31 +298,6 @@ export function PurchaseCoverage() {
         </div>
       </div>
 
-      {/* Debug Info */}
-      {isConnected && (
-        <div className="p-3 bg-gray-100 rounded-lg text-xs space-y-1">
-          <div>
-            <strong>Debug Info:</strong>
-          </div>
-          <div>• Connected: {isConnected ? "✅" : "❌"}</div>
-          <div>
-            • Current Chain: {chain?.name || "Unknown"} (ID: {chain?.id || "N/A"})
-          </div>
-          <div>• Valid Chain (Hedera 296): {isValidChain ? "✅" : "❌"}</div>
-          <div>• Coverage Amount: {coverageAmount || "empty"}</div>
-          <div>• Coverage Wei: {coverageAmountWei?.toString() || "null"}</div>
-          <div>
-            • Duration: {duration} days ({durationSeconds.toString()} seconds)
-          </div>
-          <div>• Premium Loading: {isPremiumLoading ? "⏳" : "✅"}</div>
-          <div>• Premium: {premium ? formatEther(premium) : "null"} HBAR</div>
-          <div>• Premium Wei: {premium?.toString() || "null"}</div>
-          <div>• Premium Type: {premium ? typeof premium : "undefined"}</div>
-          <div>• Premium === 0n: {premium === 0n ? "YES" : "NO"}</div>
-          <div>• Can Purchase: {canPurchase ? "✅" : "❌"}</div>
-        </div>
-      )}
-
       {/* Transaction Button */}
       <button
         onClick={isConnected && !isValidChain ? handleSwitchToHedera : handlePurchase}

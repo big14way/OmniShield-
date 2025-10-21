@@ -7,8 +7,9 @@ async function main() {
   // The user's wallet address from the transaction
   const userAddress = "0x85e271306a058020f0ebb30c45afd073400e85e5";
 
-  // Contract addresses
-  const poolAddress = "0xd6e1afe5cA8D00A2EFC01B89997abE2De47fdfAf";
+  // Contract addresses - Updated to fixed contract
+  const poolAddress = "0xCA8c8688914e0F7096c920146cd0Ad85cD7Ae8b9";
+  // Old broken contract: "0xd6e1afe5cA8D00A2EFC01B89997abE2De47fdfAf"
   const riskEngineAddress = "0x22753E4264FDDc6181dc7cce468904A80a363E44";
 
   // Get contracts
@@ -56,7 +57,7 @@ async function main() {
     console.log("✅ Premium calculated:", premium.toString(), "wei");
     console.log("   Premium in HBAR:", ethers.formatEther(premium));
 
-    const requiredValue = premium + (premium / 10n); // 110%
+    const requiredValue = premium + premium / 10n; // 110%
     console.log("   Required value (110%):", ethers.formatEther(requiredValue), "HBAR");
   } catch (error: any) {
     console.log("❌ Premium calculation failed:", error.message);
@@ -83,7 +84,7 @@ async function main() {
   console.log("\n=== Simulating createPolicy transaction ===");
   try {
     const premium = await pool.calculatePremium(coverageAmount, duration);
-    const valueToSend = premium + (premium / 10n);
+    const valueToSend = premium + premium / 10n;
 
     console.log("Simulating with value:", ethers.formatEther(valueToSend), "HBAR");
 
@@ -91,11 +92,9 @@ async function main() {
     const impersonatedProvider = await ethers.getImpersonatedSigner(userAddress);
     const poolWithSigner = pool.connect(impersonatedProvider);
 
-    const result = await poolWithSigner.createPolicy.staticCall(
-      coverageAmount,
-      duration,
-      { value: valueToSend }
-    );
+    const result = await poolWithSigner.createPolicy.staticCall(coverageAmount, duration, {
+      value: valueToSend,
+    });
     console.log("✅ Static call succeeded! Policy ID would be:", result.toString());
   } catch (error: any) {
     console.log("❌ Static call failed!");
@@ -112,7 +111,7 @@ async function main() {
         ]);
         const decodedError = errorInterface.parseError(error.data);
         console.log("   Decoded error:", decodedError?.name);
-      } catch (e) {
+      } catch {
         console.log("   Could not decode error");
       }
     }

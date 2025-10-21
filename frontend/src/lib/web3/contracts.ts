@@ -20,7 +20,7 @@ export const CONTRACT_ADDRESSES: Record<number, ContractAddresses> = {
     ccipBridge: "0x0000000000000000000000000000000000000000",
   },
   [hederaTestnet.id]: {
-    insurancePool: "0xd6e1afe5cA8D00A2EFC01B89997abE2De47fdfAf",
+    insurancePool: "0xCA8c8688914e0F7096c920146cd0Ad85cD7Ae8b9",
     riskEngine: "0x22753E4264FDDc6181dc7cce468904A80a363E44",
     claimsProcessor: "0xfaAddC93baf78e89DCf37bA67943E1bE8F37Bb8c",
     hederaBridge: "0x276C216D241856199A83bf27b2286659e5b877D3",

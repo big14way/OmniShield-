@@ -3,12 +3,18 @@ import { ethers } from "hardhat";
 async function main() {
   console.log("🔍 Testing HederaInsurancePool contract...\n");
 
-  const insurancePoolAddress = "0xd6e1afe5cA8D00A2EFC01B89997abE2De47fdfAf";
+  // Updated to fixed contract address
+  const insurancePoolAddress = "0xCA8c8688914e0F7096c920146cd0Ad85cD7Ae8b9";
+  // Old broken contract: "0xd6e1afe5cA8D00A2EFC01B89997abE2De47fdfAf"
   const riskEngineAddress = "0x22753E4264FDDc6181dc7cce468904A80a363E44";
 
   const [signer] = await ethers.getSigners();
   console.log("📝 Using account:", signer.address);
-  console.log("💰 Account balance:", ethers.formatEther(await ethers.provider.getBalance(signer.address)), "HBAR\n");
+  console.log(
+    "💰 Account balance:",
+    ethers.formatEther(await ethers.provider.getBalance(signer.address)),
+    "HBAR\n"
+  );
 
   // Get contract instances
   const insurancePool = await ethers.getContractAt("HederaInsurancePool", insurancePoolAddress);
@@ -59,13 +65,17 @@ async function main() {
 
     // Test 4: Try to create policy (simulation)
     console.log("4️⃣ Simulating createPolicy transaction...");
-    const premiumWith10PercentBuffer = premium + (premium / 10n);
-    console.log("   Sending:", ethers.formatEther(premiumWith10PercentBuffer), "HBAR (110% of premium)");
+    const premiumWith10PercentBuffer = premium + premium / 10n;
+    console.log(
+      "   Sending:",
+      ethers.formatEther(premiumWith10PercentBuffer),
+      "HBAR (110% of premium)"
+    );
 
     try {
       // Try static call first to see if it would revert
       await insurancePool.createPolicy.staticCall(coverageAmount, duration, {
-        value: premiumWith10PercentBuffer
+        value: premiumWith10PercentBuffer,
       });
       console.log("   ✅ Static call succeeded - transaction should work!");
     } catch (error: any) {
@@ -77,7 +87,6 @@ async function main() {
         console.log("   Revert data:", error.data);
       }
     }
-
   } catch (error: any) {
     console.error("\n❌ Error during testing:");
     console.error(error.message);

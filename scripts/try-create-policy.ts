@@ -3,9 +3,15 @@ import { ethers } from "hardhat";
 async function main() {
   const [signer] = await ethers.getSigners();
   console.log("Using signer:", await signer.getAddress());
-  console.log("Signer balance:", ethers.formatEther(await ethers.provider.getBalance(signer.address)), "HBAR");
+  console.log(
+    "Signer balance:",
+    ethers.formatEther(await ethers.provider.getBalance(signer.address)),
+    "HBAR"
+  );
 
-  const poolAddress = "0xd6e1afe5cA8D00A2EFC01B89997abE2De47fdfAf";
+  // Updated to fixed contract address
+  const poolAddress = "0xCA8c8688914e0F7096c920146cd0Ad85cD7Ae8b9";
+  // Old broken contract: "0xd6e1afe5cA8D00A2EFC01B89997abE2De47fdfAf"
   const pool = await ethers.getContractAt("HederaInsurancePool", poolAddress);
 
   const coverageAmount = ethers.parseEther("1.0");
@@ -15,7 +21,7 @@ async function main() {
   const premium = await pool.calculatePremium(coverageAmount, duration);
   console.log("Premium:", ethers.formatEther(premium), "HBAR");
 
-  const valueToSend = premium + (premium / 10n);
+  const valueToSend = premium + premium / 10n;
   console.log("Sending:", ethers.formatEther(valueToSend), "HBAR (110%)");
 
   console.log("\nAttempting to create policy...");
@@ -35,7 +41,7 @@ async function main() {
       try {
         const parsed = pool.interface.parseLog(log);
         return parsed?.name === "PolicyCreated";
-      } catch (e) {
+      } catch {
         return false;
       }
     });
