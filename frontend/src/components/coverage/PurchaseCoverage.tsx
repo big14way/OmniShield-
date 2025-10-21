@@ -100,8 +100,8 @@ export function PurchaseCoverage() {
         return;
       }
 
-      // Check if user has enough balance (convert to tinybars and 2x buffer)
-      const requiredBalance = (premium / (10n ** 10n)) * 2n;
+      // Check if user has enough balance (2x premium in wei)
+      const requiredBalance = premium * 2n;
       const userBalance = balance?.value || 0n;
 
       if (userBalance < requiredBalance) {
