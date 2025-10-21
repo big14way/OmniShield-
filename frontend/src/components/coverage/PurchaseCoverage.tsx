@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useAccount, useSwitchChain } from "wagmi";
+import { useAccount, useSwitchChain, useBalance } from "wagmi";
 import { parseEther, formatEther } from "viem";
 import { usePremiumCalculator, usePurchaseCoverage } from "@/lib/web3/hooks";
 import { useAssetPrice } from "@/lib/hooks/usePrices";
@@ -36,7 +36,8 @@ const COVERAGE_TYPES = [
 ];
 
 export function PurchaseCoverage() {
-  const { isConnected, chain } = useAccount();
+  const { address, isConnected, chain } = useAccount();
+  const { data: balance } = useBalance({ address });
   const { switchChain } = useSwitchChain();
   const [selectedAsset, setSelectedAsset] = useState(ASSETS[0]);
   const [coverageAmount, setCoverageAmount] = useState("10");
@@ -47,17 +48,26 @@ export function PurchaseCoverage() {
   const coverageAmountWei = parseEther(coverageAmount || "0");
   const durationSeconds = BigInt(duration * 24 * 60 * 60);
 
-  const { premium, isLoading: isPremiumLoading, isValidChain } = usePremiumCalculator(
-    coverageAmountWei,
-    durationSeconds
-  );
+  const {
+    premium,
+    isLoading: isPremiumLoading,
+    isValidChain,
+  } = usePremiumCalculator(coverageAmountWei, durationSeconds);
 
-  const { purchaseCoverage, isPending, isSuccess, hash, policyId, error: purchaseError } = usePurchaseCoverage();
+  const {
+    purchaseCoverage,
+    isPending,
+    isSuccess,
+    hash,
+    policyId,
+    error: purchaseError,
+  } = usePurchaseCoverage();
 
   const usdValue = assetPrice ? parseFloat(coverageAmount || "0") * assetPrice.price : 0;
-  
+
   const hasValidAmount = coverageAmount && parseFloat(coverageAmount) > 0;
-  const canPurchase = isConnected && isValidChain && hasValidAmount && !isPending && !isPremiumLoading;
+  const canPurchase =
+    isConnected && isValidChain && hasValidAmount && !isPending && !isPremiumLoading;
 
   const handleSwitchToHedera = () => {
     switchChain?.({ chainId: 296 });
@@ -75,7 +85,7 @@ export function PurchaseCoverage() {
         premium: formatEther(premium),
         premiumWei: premium.toString(),
       });
-      
+
       // Validate before sending
       if (coverageAmountWei === 0n) {
         alert("Coverage amount cannot be zero");
@@ -89,17 +99,33 @@ export function PurchaseCoverage() {
         alert("Premium is not calculated yet. Please wait a moment and try again.");
         return;
       }
-      
+
+      // Check if user has enough balance (2x premium in wei)
+      const requiredBalance = premium * 2n;
+      const userBalance = balance?.value || 0n;
+
+      if (userBalance < requiredBalance) {
+        alert(
+          `Insufficient HBAR balance!\n\n` +
+            `Required: ${formatEther(requiredBalance)} HBAR\n` +
+            `Your balance: ${formatEther(userBalance)} HBAR\n\n` +
+            `Please get test HBAR from: https://portal.hedera.com/faucet`
+        );
+        return;
+      }
+
       console.log("✅ All validations passed, proceeding with purchase...");
       console.log("🔍 Final check - Premium value:", {
         premium,
         premiumString: premium.toString(),
         premiumType: typeof premium,
         isZero: premium === 0n,
+        userBalance: userBalance.toString(),
+        requiredBalance: requiredBalance.toString(),
       });
-      
+
       const txHash = await purchaseCoverage(coverageAmountWei, durationSeconds, premium);
-      
+
       console.log("✅ Transaction submitted:", txHash);
     } catch (error) {
       console.error("❌ Failed to purchase coverage:", error);
@@ -130,7 +156,7 @@ export function PurchaseCoverage() {
             <div className="flex-1">
               <h3 className="text-lg font-bold text-red-900 mb-2">Wrong Network!</h3>
               <p className="text-red-800 mb-4">
-                You&apos;re currently on <strong>{chain?.name || 'Unknown Network'}</strong>. 
+                You&apos;re currently on <strong>{chain?.name || "Unknown Network"}</strong>.
                 OmniShield contracts are deployed on <strong>Hedera Testnet</strong>.
               </p>
               <button
@@ -272,25 +298,6 @@ export function PurchaseCoverage() {
         </div>
       </div>
 
-      {/* Debug Info */}
-      {isConnected && (
-        <div className="p-3 bg-gray-100 rounded-lg text-xs space-y-1">
-          <div><strong>Debug Info:</strong></div>
-          <div>• Connected: {isConnected ? '✅' : '❌'}</div>
-          <div>• Current Chain: {chain?.name || 'Unknown'} (ID: {chain?.id || 'N/A'})</div>
-          <div>• Valid Chain (Hedera 296): {isValidChain ? '✅' : '❌'}</div>
-          <div>• Coverage Amount: {coverageAmount || 'empty'}</div>
-          <div>• Coverage Wei: {coverageAmountWei?.toString() || 'null'}</div>
-          <div>• Duration: {duration} days ({durationSeconds.toString()} seconds)</div>
-          <div>• Premium Loading: {isPremiumLoading ? '⏳' : '✅'}</div>
-          <div>• Premium: {premium ? formatEther(premium) : 'null'} HBAR</div>
-          <div>• Premium Wei: {premium?.toString() || 'null'}</div>
-          <div>• Premium Type: {premium ? typeof premium : 'undefined'}</div>
-          <div>• Premium === 0n: {premium === 0n ? 'YES' : 'NO'}</div>
-          <div>• Can Purchase: {canPurchase ? '✅' : '❌'}</div>
-        </div>
-      )}
-
       {/* Transaction Button */}
       <button
         onClick={isConnected && !isValidChain ? handleSwitchToHedera : handlePurchase}
@@ -300,23 +307,27 @@ export function PurchaseCoverage() {
         {!isConnected
           ? "Connect Wallet"
           : !isValidChain
-          ? "Switch to Hedera Testnet"
-          : isPending
-          ? "Processing..."
-          : isPremiumLoading
-          ? "Calculating Premium..."
-          : !hasValidAmount
-          ? "Enter coverage amount"
-          : premium && premium > 0n
-          ? `Purchase Coverage for ${formatEther(premium)} HBAR`
-          : "Purchase Coverage"}
+            ? "Switch to Hedera Testnet"
+            : isPending
+              ? "Processing..."
+              : isPremiumLoading
+                ? "Calculating Premium..."
+                : !hasValidAmount
+                  ? "Enter coverage amount"
+                  : premium && premium > 0n
+                    ? `Purchase Coverage for ${formatEther(premium)} HBAR`
+                    : "Purchase Coverage"}
       </button>
 
-      {isConnected && isValidChain && !isPremiumLoading && hasValidAmount && (!premium || premium === 0n) && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">
-          ❌ Contract error: Unable to calculate premium. Please try again or contact support.
-        </div>
-      )}
+      {isConnected &&
+        isValidChain &&
+        !isPremiumLoading &&
+        hasValidAmount &&
+        (!premium || premium === 0n) && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">
+            ❌ Contract error: Unable to calculate premium. Please try again or contact support.
+          </div>
+        )}
 
       <TransactionStatus
         hash={hash}
@@ -343,7 +354,8 @@ export function PurchaseCoverage() {
 
       {purchaseError && (
         <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">
-          ❌ Transaction failed: {purchaseError instanceof Error ? purchaseError.message : "Unknown error"}
+          ❌ Transaction failed:{" "}
+          {purchaseError instanceof Error ? purchaseError.message : "Unknown error"}
         </div>
       )}
     </div>

@@ -442,13 +442,13 @@ contract PythPriceConsumer {
 
 ### Hedera Testnet (Chain ID: 296)
 
-| Contract            | Address                                      | HashScan Link                                                                           |
-| ------------------- | -------------------------------------------- | --------------------------------------------------------------------------------------- |
-| **InsurancePool**   | `0xd6e1afe5cA8D00A2EFC01B89997abE2De47fdfAf` | [View](https://hashscan.io/testnet/contract/0xd6e1afe5cA8D00A2EFC01B89997abE2De47fdfAf) |
-| **RiskEngine**      | `0x22753E4264FDDc6181dc7cce468904A80a363E44` | [View](https://hashscan.io/testnet/contract/0x22753E4264FDDc6181dc7cce468904A80a363E44) |
-| **ClaimsProcessor** | `0xfaAddC93baf78e89DCf37bA67943E1bE8F37Bb8c` | [View](https://hashscan.io/testnet/contract/0xfaAddC93baf78e89DCf37bA67943E1bE8F37Bb8c) |
-| **HederaBridge**    | `0x276C216D241856199A83bf27b2286659e5b877D3` | [View](https://hashscan.io/testnet/contract/0x276C216D241856199A83bf27b2286659e5b877D3) |
-| **PythConsumer**    | `0xA2aa501b19aff244D90cc15a4Cf739D2725B5729` | [View](https://hashscan.io/testnet/contract/0xA2aa501b19aff244D90cc15a4Cf739D2725B5729) |
+| Contract                  | Address                                      | HashScan Link                                                                           |
+| ------------------------- | -------------------------------------------- | --------------------------------------------------------------------------------------- |
+| **InsurancePool** (Fixed) | `0xCA8c8688914e0F7096c920146cd0Ad85cD7Ae8b9` | [View](https://hashscan.io/testnet/contract/0xCA8c8688914e0F7096c920146cd0Ad85cD7Ae8b9) |
+| **RiskEngine**            | `0x22753E4264FDDc6181dc7cce468904A80a363E44` | [View](https://hashscan.io/testnet/contract/0x22753E4264FDDc6181dc7cce468904A80a363E44) |
+| **ClaimsProcessor**       | `0xfaAddC93baf78e89DCf37bA67943E1bE8F37Bb8c` | [View](https://hashscan.io/testnet/contract/0xfaAddC93baf78e89DCf37bA67943E1bE8F37Bb8c) |
+| **HederaBridge**          | `0x276C216D241856199A83bf27b2286659e5b877D3` | [View](https://hashscan.io/testnet/contract/0x276C216D241856199A83bf27b2286659e5b877D3) |
+| **PythConsumer**          | `0xA2aa501b19aff244D90cc15a4Cf739D2725B5729` | [View](https://hashscan.io/testnet/contract/0xA2aa501b19aff244D90cc15a4Cf739D2725B5729) |
 
 **Network Details:**
 

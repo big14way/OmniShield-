@@ -1,0 +1,12 @@
+node_modules
+contracts
+scripts
+test
+deployments
+cache
+cache_forge
+artifacts
+typechain-types
+.git
+.env.local
+*.log
